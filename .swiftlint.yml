@@ -1,0 +1,42 @@
+excluded:
+  - .git
+  - Pods
+  - Carthage
+  
+line_length: # Длина строки
+    warning: 120
+    error: 160
+
+type_body_length: # Ограничение размера типов
+    warning: 300
+    error: 500
+    
+file_length:
+    warning: 800
+    error: 1000
+
+function_parameter_count:
+  warning: 5
+  error: 7
+  
+opt_in_rules:
+    - force_unwrapping # Избегаем Force unwrapping
+    - multiline_arguments_brackets # Выравниваем аргументы
+    - multiline_arguments # Выравниваем аргументы
+    - multiline_function_chains # Выравниваем связанные функции
+    - multiline_literal_brackets # Выравниваем многострочные массивы
+    - multiline_parameters # Выравниваем параметры
+    - nslocalizedstring_key # Строки всегда с ключами и комментариями
+    - weak_delegate # Делегаты всегда weak
+    - conditional_returns_on_newline # return всегда на новой строке
+    - switch_case_on_newline # switch case всегда на новой строке
+    - unneeded_parentheses_in_closure_argument # избавление от лишних скобок в замыканиях
+    - trailing_closure # согласованный синтаксис замыкания
+    - identical_operands # исправляем ошибку сравнения двух операнд
+
+analyzer_rules:
+    - unused_import
+    - unused_declaration
+    
+disabled_rules:
+  - trailing_whitespace
