@@ -98,6 +98,22 @@
         }
       }
     },
+    "Tab.cart" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cart"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Корзина"
+          }
+        }
+      }
+    },
     "Tab.catalog" : {
       "localizations" : {
         "en" : {
