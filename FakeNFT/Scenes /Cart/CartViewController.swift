@@ -10,6 +10,8 @@ import UIKit
 final class CartViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
     // MARK: - Properties
     
+    private lazy var customNavBar = CustomNavigationBar()
+    
     private lazy var nftListTableView: UITableView = {
         let tableView = UITableView()
         tableView.backgroundColor = .clear
@@ -28,26 +30,6 @@ final class CartViewController: UIViewController, UITableViewDelegate, UITableVi
         view.backgroundColor = UIColor(named: "appWhiteDynamic")
         
         setupUI()
-        setupConstraints()
-    }
-    
-    // MARK: - UI Setup
-    
-    private func setupUI() {
-        [nftListTableView].forEach {
-            view.addSubview($0)
-            $0.translatesAutoresizingMaskIntoConstraints = false
-        }
-    }
-    // MARK: - Constraints
-    
-    private func setupConstraints() {
-        NSLayoutConstraint.activate([
-            nftListTableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            nftListTableView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
-            nftListTableView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
-            nftListTableView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
-        ])
     }
     
     // MARK: - UITableViewDelegate
@@ -75,5 +57,50 @@ final class CartViewController: UIViewController, UITableViewDelegate, UITableVi
         }
         
         return cell
+    }
+    
+    // MARK: - UI Setup
+    
+    private func setupUI() {
+        [customNavBar, nftListTableView].forEach {
+            view.addSubview($0)
+            $0.translatesAutoresizingMaskIntoConstraints = false
+        }
+        
+        setupNavigationBar()
+        setupConstraints()
+    }
+    private func setupNavigationBar() {
+        customNavBar.backgroundColor = .clear
+        
+        customNavBar.configure(
+            leftButtonImage: nil,
+            title: nil,
+            rightButtonImage: UIImage(named: "iconNavBarSort")
+        )
+        
+        customNavBar.setRightButtonTarget(target: self, action: #selector(rightButtonTapped))
+    }
+    
+    // MARK: - Constraints
+    
+    private func setupConstraints() {
+        NSLayoutConstraint.activate([
+            customNavBar.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            customNavBar.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            customNavBar.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            customNavBar.heightAnchor.constraint(equalToConstant: 44),
+            
+            nftListTableView.topAnchor.constraint(equalTo: customNavBar.bottomAnchor, constant: 20),
+            nftListTableView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
+            nftListTableView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
+            nftListTableView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
+        ])
+    }
+    
+    // MARK: - Actions
+    
+    @objc private func rightButtonTapped() {
+        print("Правая кнопка нажата")
     }
 }
