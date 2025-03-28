@@ -33,14 +33,6 @@ final class CartCell: UITableViewCell {
         let stackView = UIStackView()
         stackView.axis = .horizontal
         stackView.spacing = 2
-        
-        let filledStar = UIImageView(image: UIImage(named: "iconRatingStarActive"))
-        stackView.addArrangedSubview(filledStar)
-        
-        for _ in 1..<5 {
-            let emptyStar = UIImageView(image: UIImage(named: "iconRatingStarNoActive"))
-            stackView.addArrangedSubview(emptyStar)
-        }
         return stackView
     }()
     
@@ -81,7 +73,7 @@ final class CartCell: UITableViewCell {
     
     private func setupUI() {
         contentView.backgroundColor = .clear
-        
+        configureRating(3)
         [
             itemImageView,
             itemNameLabel,
@@ -116,7 +108,6 @@ final class CartCell: UITableViewCell {
             
             itemPriceTitleLabel.topAnchor.constraint(equalTo: itemRatingStackView.bottomAnchor, constant: 12),
             itemPriceTitleLabel.leadingAnchor.constraint(equalTo: itemNameLabel.leadingAnchor),
-            itemPriceTitleLabel.bottomAnchor.constraint(equalTo: itemPriceValueLabel.topAnchor, constant: -2),
             
             itemPriceValueLabel.topAnchor.constraint(equalTo: itemPriceTitleLabel.bottomAnchor, constant: 4),
             itemPriceValueLabel.leadingAnchor.constraint(equalTo: itemNameLabel.leadingAnchor),
@@ -127,5 +118,21 @@ final class CartCell: UITableViewCell {
             removeFromCartButton.widthAnchor.constraint(equalToConstant: 40),
             removeFromCartButton.heightAnchor.constraint(equalToConstant: 40)
         ])
+    }
+    
+    // MARK: - Private methods
+    
+    private func configureRating(_ rating: Int) {
+        itemRatingStackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
+        for index in 0..<5 {
+            let starImage = (index < rating) ?
+            UIImage(named: "iconRatingStarActive") :
+            UIImage(named: "iconRatingStarNoActive")
+            
+            let imageView = UIImageView(image: starImage)
+            imageView.contentMode = .scaleAspectFit
+            imageView.clipsToBounds = true
+            itemRatingStackView.addArrangedSubview(imageView)
+        }
     }
 }
