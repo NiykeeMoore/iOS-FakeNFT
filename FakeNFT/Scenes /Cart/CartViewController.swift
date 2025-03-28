@@ -23,6 +23,40 @@ final class CartViewController: UIViewController, UITableViewDelegate, UITableVi
         return tableView
     }()
     
+    private lazy var footerView: UIView = {
+        let view = UIView()
+        view.backgroundColor = UIColor(named: "appLightGrayDynamic")
+        view.clipsToBounds = true
+        view.layer.cornerRadius = 12
+        return view
+    }()
+    
+    private lazy var totalNftCountLabel: UILabel = {
+        let label = UILabel()
+        label.font = .systemFont(ofSize: 13)
+        label.textColor = UIColor(named: "appBlackDynamic")
+        label.text = "3 NFT"
+        return label
+    }()
+    
+    private lazy var totalPriceLabel: UILabel = {
+        let label = UILabel()
+        label.font = .boldSystemFont(ofSize: 17)
+        label.textColor = UIColor(named: "appGreen")
+        label.text = "5,34 ETH"
+        return label
+    }()
+    
+    private lazy var payButton: UIButton = {
+        let button = UIButton()
+        button.setTitle("К оплате", for: .normal)
+        button.titleLabel?.font = .boldSystemFont(ofSize: 17)
+        button.setTitleColor(UIColor(named: "appWhiteDynamic"), for: .normal)
+        button.backgroundColor = UIColor(named: "appBlackDynamic")
+        button.layer.cornerRadius = 16
+        return button
+    }()
+    
     // MARK: - Lifecycle
     
     override func viewDidLoad() {
@@ -62,7 +96,12 @@ final class CartViewController: UIViewController, UITableViewDelegate, UITableVi
     // MARK: - UI Setup
     
     private func setupUI() {
-        [customNavBar, nftListTableView].forEach {
+        [totalNftCountLabel, totalPriceLabel, payButton].forEach {
+            footerView.addSubview($0)
+            $0.translatesAutoresizingMaskIntoConstraints = false
+        }
+        
+        [customNavBar, nftListTableView, footerView].forEach {
             view.addSubview($0)
             $0.translatesAutoresizingMaskIntoConstraints = false
         }
@@ -94,7 +133,24 @@ final class CartViewController: UIViewController, UITableViewDelegate, UITableVi
             nftListTableView.topAnchor.constraint(equalTo: customNavBar.bottomAnchor, constant: 20),
             nftListTableView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
             nftListTableView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
-            nftListTableView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
+            nftListTableView.bottomAnchor.constraint(equalTo: footerView.topAnchor),
+            
+            footerView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
+            footerView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
+            footerView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
+            footerView.heightAnchor.constraint(equalToConstant: 75),
+            
+            totalNftCountLabel.topAnchor.constraint(equalTo: footerView.topAnchor, constant: 16),
+            totalNftCountLabel.leadingAnchor.constraint(equalTo: footerView.leadingAnchor, constant: 16),
+            totalNftCountLabel.bottomAnchor.constraint(equalTo: totalPriceLabel.topAnchor, constant: 2),
+            
+            totalPriceLabel.leadingAnchor.constraint(equalTo: totalNftCountLabel.leadingAnchor),
+            totalPriceLabel.bottomAnchor.constraint(equalTo: footerView.bottomAnchor, constant: -16),
+            
+            payButton.topAnchor.constraint(equalTo: footerView.topAnchor, constant: 16),
+            payButton.leadingAnchor.constraint(equalTo: totalPriceLabel.trailingAnchor, constant: 20),
+            payButton.trailingAnchor.constraint(equalTo: footerView.trailingAnchor, constant: -16),
+            payButton.bottomAnchor.constraint(equalTo: footerView.bottomAnchor, constant: -16)
         ])
     }
     
