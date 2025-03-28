@@ -7,8 +7,14 @@
 
 import UIKit
 
-final class CartViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
+final class CartViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, LoadingView {
     // MARK: - Properties
+    
+    lazy var activityIndicator: UIActivityIndicatorView = {
+        let indicator = UIActivityIndicatorView(style: .medium)
+        indicator.hidesWhenStopped = true
+        return indicator
+    }()
     
     private lazy var customNavBar = CustomNavigationBar()
     
@@ -101,7 +107,7 @@ final class CartViewController: UIViewController, UITableViewDelegate, UITableVi
             $0.translatesAutoresizingMaskIntoConstraints = false
         }
         
-        [customNavBar, nftListTableView, footerView].forEach {
+        [customNavBar, nftListTableView, footerView, activityIndicator].forEach {
             view.addSubview($0)
             $0.translatesAutoresizingMaskIntoConstraints = false
         }
@@ -125,6 +131,9 @@ final class CartViewController: UIViewController, UITableViewDelegate, UITableVi
     
     private func setupConstraints() {
         NSLayoutConstraint.activate([
+            activityIndicator.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            activityIndicator.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+            
             customNavBar.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             customNavBar.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             customNavBar.trailingAnchor.constraint(equalTo: view.trailingAnchor),
