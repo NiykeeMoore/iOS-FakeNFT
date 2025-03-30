@@ -10,10 +10,10 @@ import Kingfisher
 
 // MARK: - Edit Profile View Controller
 final class EditProfileViewController: UIViewController {
-    
-    private let servicesAssembly: ServicesAssembly
+    // MARK: - Properties
     private var profileData: ProfileData
     private var onClose: (ProfileData) -> Void
+    private var imageURL: String?
     
     // MARK: - UI Elements
     
@@ -103,9 +103,8 @@ final class EditProfileViewController: UIViewController {
     )
     
     // MARK: - Initialization
-    init(profileData: ProfileData, servicesAssembly: ServicesAssembly, onClose: @escaping (ProfileData) -> Void) {
+    init(profileData: ProfileData, onClose: @escaping (ProfileData) -> Void) {
         self.profileData = profileData
-        self.servicesAssembly = servicesAssembly
         self.onClose = onClose
         super.init(nibName: nil, bundle: nil)
     }
@@ -138,7 +137,6 @@ final class EditProfileViewController: UIViewController {
     
     private func setupConstraints() {
         NSLayoutConstraint.activate([
-            
             // Content View
             contentView.topAnchor.constraint(equalTo: view.topAnchor, constant: 16),
             contentView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
@@ -208,7 +206,7 @@ final class EditProfileViewController: UIViewController {
             // Update image view with new URL
             if let url = URL(string: urlString) {
                 self.profileImageButton.kf.setImage(with: url, for: .normal)
-                self.profileData.avatar = urlString
+                self.imageURL = urlString
             } else {
                 self.showInvalidURLError()
             }
@@ -235,7 +233,7 @@ final class EditProfileViewController: UIViewController {
     deinit {
         let newData = ProfileData(
             id: profileData.id,
-            avatar: profileData.avatar,
+            avatar: imageURL ?? profileData.avatar,
             name: nameTextField.getValue(),
             description: descriptionTextField.getValue(),
             website: websiteTextField.getValue(),

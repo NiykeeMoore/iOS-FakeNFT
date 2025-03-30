@@ -9,12 +9,17 @@ import UIKit
 import Kingfisher
 
 final class ProfileViewController: UIViewController {
-    private let servicesAssembly: ServicesAssembly
-    private var profileData: ProfileData?
+    private let viewModel: ProfileViewModel
+    private var tableData: [(String, Int?)] = []
     
     // MARK: - UI Elements
     
-    private lazy var activityIndicator = UIActivityIndicatorView()
+    private lazy var activityIndicator: UIActivityIndicatorView = {
+        let indicator = UIActivityIndicatorView(style: .medium)
+        indicator.translatesAutoresizingMaskIntoConstraints = false
+        indicator.hidesWhenStopped = true
+        return indicator
+    }()
     
     private lazy var contentView: UIView = {
         let view = UIView()
@@ -28,9 +33,9 @@ final class ProfileViewController: UIViewController {
         imageView.contentMode = .scaleAspectFill
         imageView.clipsToBounds = true
         imageView.layer.cornerRadius = 35
-        imageView.backgroundColor = .lightGray
+        imageView.backgroundColor = UIColor(named: "appLightGrayDynamic")
         imageView.kf.indicatorType = .activity
-        imageView.kf.setImage(with: URL(string: profileData?.avatar ?? ""))
+        imageView.kf.setImage(with: URL(string: viewModel.profileData?.avatar ?? ""))
         return imageView
     }()
     
@@ -39,7 +44,7 @@ final class ProfileViewController: UIViewController {
         label.translatesAutoresizingMaskIntoConstraints = false
         label.font = .systemFont(ofSize: 22, weight: .bold)
         label.textColor = UIColor(named: "appBlackDynamic")
-        label.text = profileData?.name ?? ""
+        label.text = viewModel.profileData?.name ?? ""
         return label
     }()
     
@@ -47,7 +52,7 @@ final class ProfileViewController: UIViewController {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.font = .systemFont(ofSize: 13, weight: .regular)
-        label.text = profileData?.description  ?? ""
+        label.text = viewModel.profileData?.description  ?? ""
         label.textColor = UIColor(named: "appBlackDynamic")
         label.numberOfLines = 0
         return label
@@ -56,14 +61,14 @@ final class ProfileViewController: UIViewController {
     private lazy var websiteButton: UIButton = {
         let button = UIButton()
         button.translatesAutoresizingMaskIntoConstraints = false
-        button.setTitle(profileData?.website ?? "", for: .normal)
+        button.setTitle(viewModel.profileData?.website ?? "", for: .normal)
         button.setTitleColor(.systemBlue, for: .normal)
         button.titleLabel?.font = .systemFont(ofSize: 15, weight: .regular)
         button.contentHorizontalAlignment = .left
         return button
     }()
     
-    private let tableView: UITableView = {
+    private lazy var tableView: UITableView = {
         let tableView = UITableView(frame: .zero, style: .plain)
         tableView.translatesAutoresizingMaskIntoConstraints = false
         tableView.isScrollEnabled = false
@@ -73,7 +78,7 @@ final class ProfileViewController: UIViewController {
         return tableView
     }()
     
-    private let editButton: UIButton = {
+    private lazy var editButton: UIButton = {
         let button = UIButton(type: .custom)
         
         button.translatesAutoresizingMaskIntoConstraints = false
@@ -87,15 +92,10 @@ final class ProfileViewController: UIViewController {
         return button
     }()
     
-    private lazy var tableData = [
-        ("Мои NFT", profileData?.nfts.count ?? 0),
-        ("Избранные NFT", profileData?.likes.count ?? 0),
-        ("О разработчике", nil)
-    ]
-    
     init(servicesAssembly: ServicesAssembly) {
-        self.servicesAssembly = servicesAssembly
+        self.viewModel = ProfileViewModel(servicesAssembly: servicesAssembly)
         super.init(nibName: nil, bundle: nil)
+        setupBindings()
     }
     
     required init?(coder: NSCoder) {
@@ -106,29 +106,30 @@ final class ProfileViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        // Loader View
-        view.addSubview(activityIndicator)
-        activityIndicator.constraintCenters(to: view)
-        
-        loadProfileData()
+        setupView()
+        setupTableView()
+        setupConstraints()
+        viewModel.loadProfile()
     }
     
     // MARK: - Setup
     
-    private func loadProfileData() {
-        activityIndicator.startAnimating()
-
-        servicesAssembly.profileService.loadProfileData(id: "1") { [weak self] result in
-            switch result {
-            case .success(let data):
-                self?.profileData = data
-                self?.setupView()
-                self?.setupConstraints()
-                self?.setupTableView()
+    private func setupBindings() {
+        viewModel.onProfileUpdate = { [weak self] profileData in
+            self?.updateUI(with: profileData)
+        }
+        
+        viewModel.onError = { [weak self] error in
+            self?.showErrorAlert(error: error)
+        }
+        
+        viewModel.isLoading = { [weak self] isLoading in
+            if isLoading {
+                self?.contentView.isHidden = true
+                self?.activityIndicator.startAnimating()
+            } else {
+                self?.contentView.isHidden = false
                 self?.activityIndicator.stopAnimating()
-            case .failure(let error):
-                print("Could not load profile data: \(error)")
             }
         }
     }
@@ -138,6 +139,7 @@ final class ProfileViewController: UIViewController {
         title = "Профиль"
         
         view.addSubview(contentView)
+        view.addSubview(activityIndicator)
         
         contentView.addSubview(editButton)
         contentView.addSubview(profileImageView)
@@ -145,7 +147,6 @@ final class ProfileViewController: UIViewController {
         contentView.addSubview(descriptionLabel)
         contentView.addSubview(websiteButton)
         contentView.addSubview(tableView)
-        contentView.addSubview(activityIndicator)
         
         // Add button actions
         websiteButton.addTarget(self, action: #selector(websiteButtonTapped), for: .touchUpInside)
@@ -157,12 +158,31 @@ final class ProfileViewController: UIViewController {
         tableView.delegate = self
     }
     
+    private func updateUI(with profileData: ProfileData) {
+        profileImageView.kf.setImage(with: URL(string: profileData.avatar))
+        nameLabel.text = profileData.name
+        descriptionLabel.text = profileData.description
+        websiteButton.setTitle(profileData.website, for: .normal)
+        tableData = viewModel.getTableData()
+        tableView.reloadData()
+    }
+    
     // MARK: - Actions
     
     @objc private func websiteButtonTapped() {
         if let url = URL(string: "https://yandex.ru") {
             UIApplication.shared.open(url)
         }
+    }
+    
+    private func showErrorAlert(error: Error) {
+        let alert = UIAlertController(
+            title: "Ошибка",
+            message: error.localizedDescription,
+            preferredStyle: .alert
+        )
+        alert.addAction(UIAlertAction(title: "OK", style: .default))
+        present(alert, animated: true)
     }
     
     // MARK: - Constraints
@@ -206,7 +226,11 @@ final class ProfileViewController: UIViewController {
             tableView.topAnchor.constraint(equalTo: websiteButton.bottomAnchor, constant: 30),
             tableView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
-            tableView.heightAnchor.constraint(equalToConstant: CGFloat(tableData.count * 54))
+            tableView.heightAnchor.constraint(equalToConstant: CGFloat(3 * 54)),
+            
+            // Loader View
+            activityIndicator.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            activityIndicator.centerYAnchor.constraint(equalTo: view.centerYAnchor)
         ])
     }
 }
@@ -252,35 +276,16 @@ extension ProfileViewController: UITableViewDataSource, UITableViewDelegate {
 // MARK: - Update ProfileViewController
 extension ProfileViewController {
     @objc private func editButtonTapped() {
-        guard let profileData = profileData
+        guard let profileData = viewModel.profileData
         else { return }
         
         let editVC = EditProfileViewController(
-            profileData: profileData,
-            servicesAssembly: servicesAssembly
+            profileData: profileData
         ) { [weak self] updatedProfile in
-            self?.updateData(newData: updatedProfile)
+            self?.viewModel.updateProfile(updatedProfile)
         }
         
         editVC.modalPresentationStyle = .pageSheet
         present(editVC, animated: true)
-    }
-    
-    private func updateData(newData: ProfileData) {
-        activityIndicator.startAnimating()
-        let service = servicesAssembly.profileService
-        service.updateProfileData(id: "1", newData: newData) { [weak self] result in
-            switch result {
-            case .success(let data):
-                self?.profileData = data
-                self?.profileImageView.kf.setImage(with: URL(string: data.avatar))
-                self?.nameLabel.text = data.name
-                self?.descriptionLabel.text = data.description
-                self?.websiteButton.setTitle(data.website, for: .normal)
-                self?.activityIndicator.stopAnimating()
-            case .failure(let error):
-                print("Could not update profile data: \(error)")
-            }
-        }
     }
 }

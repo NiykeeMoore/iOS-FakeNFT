@@ -38,10 +38,8 @@ final class ProfileServiceImpl: ProfileService {
         networkClient.send(request: request, type: ProfileData.self) { result in
             switch result {
             case .success(let data):
-                print("success!!! data: \(data)")
                 completion(.success(data))
             case .failure(let error):
-                print("failure... error: \(error)")
                 completion(.failure(error))
             }
         }
