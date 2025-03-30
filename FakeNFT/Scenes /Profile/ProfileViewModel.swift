@@ -60,7 +60,9 @@ final class ProfileViewModel {
     }
     
     func validateWebsiteURL() -> URL? {
-        guard let website = profileData?.website else { return nil }
+        guard let website = profileData?.website else {
+            return nil
+        }
         return URL(string: website)
     }
 }

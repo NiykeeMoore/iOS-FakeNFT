@@ -245,8 +245,9 @@ extension ProfileViewController: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         guard let cell = tableView.dequeueReusableCell(
             withIdentifier: "ProfileTableViewCell", for: indexPath
-        ) as? ProfileTableViewCell
-        else { return UITableViewCell() }
+        ) as? ProfileTableViewCell else {
+            return UITableViewCell()
+        }
         
         let (title, count) = tableData[indexPath.row]
         cell.configure(title: title, count: count)
@@ -287,8 +288,9 @@ extension ProfileViewController: UITableViewDataSource, UITableViewDelegate {
 // MARK: - Update ProfileViewController
 extension ProfileViewController {
     @objc private func editButtonTapped() {
-        guard let profileData = viewModel.profileData
-        else { return }
+        guard let profileData = viewModel.profileData else {
+            return
+        }
         
         let editVC = EditProfileViewController(
             profileData: profileData
