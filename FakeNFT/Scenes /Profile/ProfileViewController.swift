@@ -120,7 +120,7 @@ final class ProfileViewController: UIViewController {
         }
         
         viewModel.onError = { [weak self] error in
-            self?.showErrorAlert(error: error)
+            self?.showErrorAlert(errorDescription: error.localizedDescription)
         }
         
         viewModel.isLoading = { [weak self] isLoading in
@@ -175,10 +175,10 @@ final class ProfileViewController: UIViewController {
         }
     }
     
-    private func showErrorAlert(error: Error) {
+    private func showErrorAlert(errorDescription: String) {
         let alert = UIAlertController(
             title: "Ошибка",
-            message: error.localizedDescription,
+            message: errorDescription,
             preferredStyle: .alert
         )
         alert.addAction(UIAlertAction(title: "OK", style: .default))
@@ -266,10 +266,21 @@ extension ProfileViewController: UITableViewDataSource, UITableViewDelegate {
         case 1:
             print("Избранные NFT tapped")
         case 2:
-            print("О разработчике tapped")
+            openWebsite()
         default:
             break
         }
+    }
+    
+    private func openWebsite() {
+        guard let url = viewModel.validateWebsiteURL() else {
+            showErrorAlert(errorDescription: "Website URL is not valid")
+            return
+        }
+        
+        let webVC = WebViewController(url: url)
+        webVC.modalPresentationStyle = .pageSheet
+        present(webVC, animated: true)
     }
 }
 
