@@ -58,16 +58,6 @@ final class ProfileViewController: UIViewController {
         return label
     }()
     
-    private lazy var websiteButton: UIButton = {
-        let button = UIButton()
-        button.translatesAutoresizingMaskIntoConstraints = false
-        button.setTitle(viewModel.profileData?.website ?? "", for: .normal)
-        button.setTitleColor(.systemBlue, for: .normal)
-        button.titleLabel?.font = .systemFont(ofSize: 15, weight: .regular)
-        button.contentHorizontalAlignment = .left
-        return button
-    }()
-    
     private lazy var tableView: UITableView = {
         let tableView = UITableView(frame: .zero, style: .plain)
         tableView.translatesAutoresizingMaskIntoConstraints = false
@@ -136,7 +126,6 @@ final class ProfileViewController: UIViewController {
     
     private func setupView() {
         view.backgroundColor = .white
-        title = "Профиль"
         
         view.addSubview(contentView)
         view.addSubview(activityIndicator)
@@ -145,11 +134,9 @@ final class ProfileViewController: UIViewController {
         contentView.addSubview(profileImageView)
         contentView.addSubview(nameLabel)
         contentView.addSubview(descriptionLabel)
-        contentView.addSubview(websiteButton)
         contentView.addSubview(tableView)
         
         // Add button actions
-        websiteButton.addTarget(self, action: #selector(websiteButtonTapped), for: .touchUpInside)
         editButton.addTarget(self, action: #selector(editButtonTapped), for: .touchUpInside)
     }
     
@@ -162,18 +149,11 @@ final class ProfileViewController: UIViewController {
         profileImageView.kf.setImage(with: URL(string: profileData.avatar))
         nameLabel.text = profileData.name
         descriptionLabel.text = profileData.description
-        websiteButton.setTitle(profileData.website, for: .normal)
         tableData = viewModel.getTableData()
         tableView.reloadData()
     }
     
     // MARK: - Actions
-    
-    @objc private func websiteButtonTapped() {
-        if let url = URL(string: "https://yandex.ru") {
-            UIApplication.shared.open(url)
-        }
-    }
     
     private func showErrorAlert(errorDescription: String) {
         let alert = UIAlertController(
@@ -217,13 +197,8 @@ final class ProfileViewController: UIViewController {
             descriptionLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
             descriptionLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
             
-            // Website Button
-            websiteButton.topAnchor.constraint(equalTo: descriptionLabel.bottomAnchor, constant: 8),
-            websiteButton.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
-            websiteButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
-            
             // Table View
-            tableView.topAnchor.constraint(equalTo: websiteButton.bottomAnchor, constant: 30),
+            tableView.topAnchor.constraint(equalTo: descriptionLabel.bottomAnchor, constant: 30),
             tableView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
             tableView.heightAnchor.constraint(equalToConstant: CGFloat(3 * 54)),
@@ -275,7 +250,7 @@ extension ProfileViewController: UITableViewDataSource, UITableViewDelegate {
     
     private func openWebsite() {
         guard let url = viewModel.validateWebsiteURL() else {
-            showErrorAlert(errorDescription: "Website URL is not valid")
+            showErrorAlert(errorDescription: NSLocalizedString("Webview.invalidURL", comment: ""))
             return
         }
         

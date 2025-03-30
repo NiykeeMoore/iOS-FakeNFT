@@ -53,9 +53,9 @@ final class ProfileViewModel {
     
     func getTableData() -> [(String, Int?)] {
         return [
-            ("Мои NFT", profileData?.nfts.count),
-            ("Избранные NFT", profileData?.likes.count),
-            ("О разработчике", nil)
+            (NSLocalizedString("Profile.myNFT", comment: ""), profileData?.nfts.count),
+            (NSLocalizedString("Profile.likedNFT", comment: ""), profileData?.likes.count),
+            (NSLocalizedString("Profile.website", comment: ""), nil)
         ]
     }
     

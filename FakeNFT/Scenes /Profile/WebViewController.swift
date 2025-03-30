@@ -71,8 +71,12 @@ extension WebViewController: WKNavigationDelegate {
     }
     
     private func showErrorAlert(message: String) {
-        let alert = UIAlertController(title: "Error", message: message, preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "OK", style: .default))
+        let alert = UIAlertController(
+            title: NSLocalizedString("Error.title", comment: ""),
+            message: message,
+            preferredStyle: .alert
+        )
+        alert.addAction(UIAlertAction(title: NSLocalizedString("Profile.okButton", comment: ""), style: .default))
         present(alert, animated: true)
     }
 }

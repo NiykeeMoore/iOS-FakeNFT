@@ -47,7 +47,7 @@ final class EditProfileViewController: UIViewController {
         // Create "Change" label
         let changeLabel = UILabel()
         changeLabel.translatesAutoresizingMaskIntoConstraints = false
-        changeLabel.text = "Сменить фото"
+        changeLabel.text = NSLocalizedString("Profile.changeImgLabel", comment: "")
         changeLabel.textColor = .white
         changeLabel.font = .systemFont(ofSize: 10, weight: .medium)
         changeLabel.textAlignment = .center
@@ -87,18 +87,18 @@ final class EditProfileViewController: UIViewController {
     }()
     
     private lazy var nameTextField = TextFieldView(
-        title: "Имя",
+        title: NSLocalizedString("Profile.editNameTitle", comment: ""),
         initialValue: profileData.name
     )
     
     private lazy var descriptionTextField = TextFieldView(
-        title: "Описание",
+        title: NSLocalizedString("Profile.editDescTitle", comment: ""),
         initialValue: profileData.description,
         isTextView: true
     )
     
     private lazy var websiteTextField = TextFieldView(
-        title: "Сайт",
+        title: NSLocalizedString("Profile.editSiteTitle", comment: ""),
         initialValue: profileData.website
     )
     
@@ -180,8 +180,8 @@ final class EditProfileViewController: UIViewController {
     
     @objc private func profileImageButtonTapped() {
         let alert = UIAlertController(
-            title: "Изменить фото профиля",
-            message: "Укажите ссылку на фото",
+            title: NSLocalizedString("Profile.changeImgTitle", comment: ""),
+            message: NSLocalizedString("Profile.changeImgDesc", comment: ""),
             preferredStyle: .alert
         )
         
@@ -195,7 +195,10 @@ final class EditProfileViewController: UIViewController {
         }
         
         // Add OK action
-        let okAction = UIAlertAction(title: "Ок", style: .default) { [weak self] _ in
+        let okAction = UIAlertAction(
+            title: NSLocalizedString("Profile.okButton", comment: ""),
+            style: .default
+        ) { [weak self] _ in
             guard let self = self,
                   let textField = alert.textFields?.first,
                   let urlString = textField.text?.trimmingCharacters(in: .whitespacesAndNewlines),
@@ -214,7 +217,7 @@ final class EditProfileViewController: UIViewController {
         alert.addAction(okAction)
         
         // Add Cancel action
-        let cancelAction = UIAlertAction(title: "Отмена", style: .cancel)
+        let cancelAction = UIAlertAction(title: NSLocalizedString("Profile.cancelButton", comment: ""), style: .cancel)
         alert.addAction(cancelAction)
         
         present(alert, animated: true)
@@ -222,11 +225,11 @@ final class EditProfileViewController: UIViewController {
     
     private func showInvalidURLError() {
         let alert = UIAlertController(
-            title: "Некорректная ссылка",
-            message: "Пожалуйста, укажите корректную ссылку на фото",
+            title: NSLocalizedString("Profile.invalidImgURLTitle", comment: ""),
+            message: NSLocalizedString("Profile.invalidImgURLDesc", comment: ""),
             preferredStyle: .alert
         )
-        alert.addAction(UIAlertAction(title: "Ок", style: .default))
+        alert.addAction(UIAlertAction(title: NSLocalizedString("Profile.okButton", comment: ""), style: .default))
         present(alert, animated: true)
     }
     
