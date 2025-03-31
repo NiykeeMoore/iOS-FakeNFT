@@ -7,14 +7,16 @@
 
 import UIKit
 
-final class CartViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, LoadingView {
+final class CartViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, CartView, LoadingView {
     // MARK: - Properties
-    
     lazy var activityIndicator: UIActivityIndicatorView = {
         let indicator = UIActivityIndicatorView(style: .medium)
         indicator.hidesWhenStopped = true
         return indicator
     }()
+    
+    private var viewModel: CartViewModel
+    private var cartItems: [CartItem] = []
     
     private lazy var customNavBar = CustomNavigationBar()
     
@@ -41,7 +43,6 @@ final class CartViewController: UIViewController, UITableViewDelegate, UITableVi
         let label = UILabel()
         label.font = .systemFont(ofSize: 13)
         label.textColor = UIColor(named: "appBlackDynamic")
-        label.text = "3 NFT"
         return label
     }()
     
@@ -49,7 +50,6 @@ final class CartViewController: UIViewController, UITableViewDelegate, UITableVi
         let label = UILabel()
         label.font = .boldSystemFont(ofSize: 17)
         label.textColor = UIColor(named: "appGreen")
-        label.text = "5,34 ETH"
         return label
     }()
     
@@ -63,6 +63,16 @@ final class CartViewController: UIViewController, UITableViewDelegate, UITableVi
         return button
     }()
     
+    // MARK: - Init
+    init(viewModel: CartViewModel) {
+        self.viewModel = viewModel
+        super.init(nibName: nil, bundle: nil)
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     // MARK: - Lifecycle
     
     override func viewDidLoad() {
@@ -70,6 +80,7 @@ final class CartViewController: UIViewController, UITableViewDelegate, UITableVi
         view.backgroundColor = UIColor(named: "appWhiteDynamic")
         
         setupUI()
+        viewModel.viewDidLoad()
     }
     
     // MARK: - UITableViewDelegate
@@ -85,16 +96,20 @@ final class CartViewController: UIViewController, UITableViewDelegate, UITableVi
     // MARK: - UITableViewDataSource
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 3
+        return cartItems.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        guard let cell = tableView.dequeueReusableCell(
-            withIdentifier: CartCell.reuseIdentifier,
-            for: indexPath
-        ) as? CartCell else {
+        guard
+            let cell = tableView.dequeueReusableCell(
+                withIdentifier: CartCell.reuseIdentifier,
+                for: indexPath
+            ) as? CartCell else {
             return UITableViewCell()
         }
+        
+        let item = cartItems[indexPath.row]
+        cell.configure(with: item)
         
         return cell
     }
@@ -161,6 +176,18 @@ final class CartViewController: UIViewController, UITableViewDelegate, UITableVi
             payButton.trailingAnchor.constraint(equalTo: footerView.trailingAnchor, constant: -16),
             payButton.bottomAnchor.constraint(equalTo: footerView.bottomAnchor, constant: -16)
         ])
+    }
+    
+    // MARK: - CartView
+    func displayCartItems(_ items: [CartItem]) {
+        self.cartItems = items
+        nftListTableView.reloadData()
+    }
+
+    func updateTotal(count: Int, price: String) {
+        totalNftCountLabel.text = "\(count) NFT"
+        totalPriceLabel.text = price
+        payButton.isEnabled = count > 0
     }
     
     // MARK: - Actions

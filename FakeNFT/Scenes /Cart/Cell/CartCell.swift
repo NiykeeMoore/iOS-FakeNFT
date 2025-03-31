@@ -6,16 +6,18 @@
 //
 
 import UIKit
+import Kingfisher
 
 final class CartCell: UITableViewCell {
     // MARK: - Properties
     
     static let reuseIdentifier = String(describing: CartCell.self)
+    private var currentItemId: String?
     
     // MARK: - UI Components
     
     private lazy var itemImageView: UIImageView = {
-        let image = UIImageView(image: UIImage(named: "nft"))
+        let image = UIImageView()
         image.contentMode = .scaleAspectFit
         image.clipsToBounds = true
         return image
@@ -23,7 +25,6 @@ final class CartCell: UITableViewCell {
     
     private lazy var itemNameLabel: UILabel = {
         let label = UILabel()
-        label.text = "April"
         label.font = .systemFont(ofSize: 17, weight: .bold)
         label.textColor = UIColor(named: "appBlackDynamic")
         return label
@@ -45,7 +46,6 @@ final class CartCell: UITableViewCell {
     
     private lazy var itemPriceValueLabel: UILabel = {
         let label = UILabel()
-        label.text = "1,78 ETH"
         label.font = .systemFont(ofSize: 14, weight: .bold)
         return label
     }()
@@ -118,6 +118,23 @@ final class CartCell: UITableViewCell {
             removeFromCartButton.widthAnchor.constraint(equalToConstant: 40),
             removeFromCartButton.heightAnchor.constraint(equalToConstant: 40)
         ])
+    }
+    
+    func configure(with item: CartItem) {
+        currentItemId = item.id
+        itemNameLabel.text = item.name
+        itemPriceValueLabel.text = String(format: "%.2f ETH", item.price)
+        configureRating(item.rating)
+        
+        if let imageURL = item.imageURL {
+            itemImageView.kf.indicatorType = .activity
+            itemImageView.kf.setImage(
+                with: imageURL,
+                placeholder: UIImage(named: "nftPlaceholder") // TODO: посмотреть плейсхолдер
+            )
+        } else {
+            itemImageView.image = UIImage(named: "nftPlaceholder") // TODO: определиться с дефолтом
+        }
     }
     
     // MARK: - Private methods

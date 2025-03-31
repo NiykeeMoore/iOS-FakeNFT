@@ -37,7 +37,8 @@ final class TabBarController: UITabBarController {
         )
         catalogController.tabBarItem = catalogTabBarItem
         
-        let cartController = CartViewController()
+        let cartAssembly = CartAssembly(servicesAssembly: servicesAssembly)
+        let cartController = cartAssembly.build()
         cartController.tabBarItem = cartTabBarItem
         
         viewControllers = [catalogController, cartController]
