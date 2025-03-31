@@ -59,6 +59,16 @@ final class ProfileViewController: UIViewController {
         return label
     }()
     
+    private lazy var websiteLabel: UILabel = {
+        let label = UILabel()
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.font = .systemFont(ofSize: 15, weight: .regular)
+        label.text = viewModel.profileData?.website  ?? ""
+        label.textColor = UIColor(named: "appBlue")
+        label.numberOfLines = 1
+        return label
+    }()
+    
     private lazy var tableView: UITableView = {
         let tableView = UITableView(frame: .zero, style: .plain)
         tableView.translatesAutoresizingMaskIntoConstraints = false
@@ -135,6 +145,7 @@ final class ProfileViewController: UIViewController {
         contentView.addSubview(profileImageView)
         contentView.addSubview(nameLabel)
         contentView.addSubview(descriptionLabel)
+        contentView.addSubview(websiteLabel)
         contentView.addSubview(tableView)
         
         // Add button actions
@@ -150,6 +161,7 @@ final class ProfileViewController: UIViewController {
         profileImageView.kf.setImage(with: URL(string: profileData.avatar))
         nameLabel.text = profileData.name
         descriptionLabel.text = profileData.description
+        websiteLabel.text = profileData.website
         tableData = viewModel.getTableData()
         tableView.reloadData()
     }
@@ -198,8 +210,13 @@ final class ProfileViewController: UIViewController {
             descriptionLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
             descriptionLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
             
+            // Website Label
+            websiteLabel.topAnchor.constraint(equalTo: descriptionLabel.bottomAnchor, constant: 12),
+            websiteLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+            websiteLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
+            
             // Table View
-            tableView.topAnchor.constraint(equalTo: descriptionLabel.bottomAnchor, constant: 30),
+            tableView.topAnchor.constraint(equalTo: websiteLabel.bottomAnchor, constant: 40),
             tableView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
             tableView.heightAnchor.constraint(equalToConstant: CGFloat(3 * 54)),
