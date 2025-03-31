@@ -12,9 +12,7 @@ final class CatalogViewController: UIViewController, LoadingView {
 
     var activityIndicator: UIActivityIndicatorView
     
-    private var viewModel: CatalogViewModel
-    
-    private var catalogItems: [NftCollectionModel] = []
+    private var viewModel: CatalogViewModelProtocol
     
     private lazy var tableView: UITableView = {
         let tableView = UITableView()
@@ -45,7 +43,7 @@ final class CatalogViewController: UIViewController, LoadingView {
         fetchCollections()
     }
     
-    init(viewModel: CatalogViewModel) {
+    init(viewModel: CatalogViewModelProtocol) {
         self.viewModel = viewModel
         self.activityIndicator = UIActivityIndicatorView(style: .large)
         super.init(nibName: nil, bundle: nil)
@@ -77,15 +75,16 @@ final class CatalogViewController: UIViewController, LoadingView {
     }
     
     private func fetchCollections() {
-        if !refreshControl.isRefreshing {
-            activityIndicator.startAnimating()
+        guard !refreshControl.isRefreshing else {
+            return
         }
-        viewModel.getCollections { [weak self] catalogItems in
+        activityIndicator.startAnimating()
+        
+        viewModel.getCollections { [weak self] _ in
             self?.activityIndicator.stopAnimating()
             guard let self = self else {
                 return
             }
-            self.catalogItems = catalogItems
             self.tableView.reloadData()
             self.refreshControl.endRefreshing()
         }
@@ -118,7 +117,7 @@ extension CatalogViewController: UITableViewDataSource {
         _ tableView: UITableView,
         numberOfRowsInSection section: Int
     ) -> Int {
-        catalogItems.count
+        viewModel.catalogItems.count
     }
     
     func tableView(
@@ -132,7 +131,7 @@ extension CatalogViewController: UITableViewDataSource {
             return UITableViewCell()
         }
         
-        let catalogItem = catalogItems[indexPath.row]
+        let catalogItem = viewModel.catalogItems[indexPath.row]
         cell.configure(with: catalogItem)
         cell.selectionStyle = .none
         cell.backgroundColor = UIColor(named: "appWhite")

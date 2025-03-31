@@ -5,12 +5,16 @@
 //  Created by Никита Соловьев on 25.03.2025.
 //
 
-import UIKit
-import Kingfisher
+import Foundation
 
-final class CatalogViewModel {
+protocol CatalogViewModelProtocol {
+    var catalogItems: [NftCollectionModel] { get }
+    func getCollections(completion: @escaping ([NftCollectionModel]) -> Void)
+}
+
+final class CatalogViewModel: CatalogViewModelProtocol {
     
-    private var catalogItems: [NftCollectionModel] = []
+    var catalogItems: [NftCollectionModel] = []
     private let netWorkClient: NetworkClient
     
     init(netWorkClient: NetworkClient) {
