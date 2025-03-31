@@ -22,13 +22,14 @@ final class TabBarController: UITabBarController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        let catalogController = TestCatalogViewController(
-            servicesAssembly: servicesAssembly
-        )
-        catalogController.tabBarItem = catalogTabBarItem
+        let catalogViewModel = CatalogViewModel(netWorkClient: DefaultNetworkClient())
+        let catalogViewController = CatalogViewController(viewModel: catalogViewModel)
+        catalogViewController.tabBarItem = catalogTabBarItem
 
-        viewControllers = [catalogController]
+        viewControllers = [catalogViewController]
 
-        view.backgroundColor = .systemBackground
+        view.backgroundColor = UIColor(named: "appWhite")
+        tabBar.unselectedItemTintColor = UIColor(named: "appBlack")
+        tabBar.isTranslucent = false
     }
 }
