@@ -7,9 +7,10 @@
 
 import UIKit
 import Kingfisher
+import SafariServices
 
 final class ProfileViewController: UIViewController {
-    private let viewModel: ProfileViewModel
+    private var viewModel: ProfileViewModelProtocol
     private var tableData: [(String, Int?)] = []
     
     // MARK: - UI Elements
@@ -82,8 +83,8 @@ final class ProfileViewController: UIViewController {
         return button
     }()
     
-    init(servicesAssembly: ServicesAssembly) {
-        self.viewModel = ProfileViewModel(servicesAssembly: servicesAssembly)
+    init(viewModel: ProfileViewModelProtocol) {
+        self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
         setupBindings()
     }
@@ -248,15 +249,17 @@ extension ProfileViewController: UITableViewDataSource, UITableViewDelegate {
         }
     }
     
-    private func openWebsite() {
+    func openWebsite() {
         guard let url = viewModel.validateWebsiteURL() else {
             showErrorAlert(errorDescription: NSLocalizedString("Webview.invalidURL", comment: ""))
             return
         }
         
-        let webVC = WebViewController(url: url)
-        webVC.modalPresentationStyle = .pageSheet
-        present(webVC, animated: true)
+        let config = SFSafariViewController.Configuration()
+        let safariVC = SFSafariViewController(url: url, configuration: config)
+        safariVC.preferredControlTintColor = UIColor(named: "appBlackDynamic")
+        
+        present(safariVC, animated: true)
     }
 }
 

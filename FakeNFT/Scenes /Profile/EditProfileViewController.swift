@@ -31,12 +31,6 @@ final class EditProfileViewController: UIViewController {
         button.backgroundColor = .lightGray
         button.contentMode = .scaleAspectFill
         
-        // Set the initial image (using Kingfisher)
-        if let url = URL(string: profileData.avatar) {
-            button.kf.setImage(with: url, for: .normal)
-            button.imageView?.contentMode = .scaleAspectFill
-        }
-        
         // Create dark overlay view
         let overlayView = UIView()
         overlayView.translatesAutoresizingMaskIntoConstraints = false
@@ -120,6 +114,20 @@ final class EditProfileViewController: UIViewController {
         setupConstraints()
     }
     
+    override func viewWillDisappear(_ animated: Bool) {
+        let newData = ProfileData(
+            id: profileData.id,
+            avatar: imageURL ?? profileData.avatar,
+            name: nameTextField.getValue(),
+            description: descriptionTextField.getValue(),
+            website: websiteTextField.getValue(),
+            nfts: profileData.nfts,
+            likes: profileData.likes
+        )
+        onClose(newData)
+        super.viewWillDisappear(animated)
+    }
+    
     // MARK: - Setup
     private func setupView() {
         view.backgroundColor = .systemBackground
@@ -131,8 +139,15 @@ final class EditProfileViewController: UIViewController {
         contentView.addSubview(descriptionTextField)
         contentView.addSubview(websiteTextField)
         
+        // Actions
         closeButton.addTarget(self, action: #selector(closeButtonTapped), for: .touchUpInside)
         profileImageButton.addTarget(self, action: #selector(profileImageButtonTapped), for: .touchUpInside)
+        
+        // Set the initial image (using Kingfisher)
+        if let url = URL(string: profileData.avatar) {
+            profileImageButton.kf.setImage(with: url, for: .normal)
+            profileImageButton.imageView?.contentMode = .scaleAspectFill
+        }
     }
     
     private func setupConstraints() {
@@ -231,18 +246,5 @@ final class EditProfileViewController: UIViewController {
         )
         alert.addAction(UIAlertAction(title: NSLocalizedString("Profile.okButton", comment: ""), style: .default))
         present(alert, animated: true)
-    }
-    
-    deinit {
-        let newData = ProfileData(
-            id: profileData.id,
-            avatar: imageURL ?? profileData.avatar,
-            name: nameTextField.getValue(),
-            description: descriptionTextField.getValue(),
-            website: websiteTextField.getValue(),
-            nfts: profileData.nfts,
-            likes: profileData.likes
-        )
-        onClose(newData)
     }
 }
