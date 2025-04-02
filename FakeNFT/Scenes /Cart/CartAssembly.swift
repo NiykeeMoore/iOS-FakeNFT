@@ -19,8 +19,6 @@ final class CartAssembly {
         let viewModel = CartViewModelImpl(cartService: cartService)
         let viewController = CartViewController(viewModel: viewModel)
         
-        viewModel.view = viewController
-
         return viewController
     }
 }

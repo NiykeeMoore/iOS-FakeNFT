@@ -7,7 +7,7 @@
 
 import UIKit
 
-final class CartViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, CartView, LoadingView {
+final class CartViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, LoadingView, ErrorView {
     // MARK: - Properties
     lazy var activityIndicator: UIActivityIndicatorView = {
         let indicator = UIActivityIndicatorView(style: .medium)
@@ -16,7 +16,6 @@ final class CartViewController: UIViewController, UITableViewDelegate, UITableVi
     }()
     
     private var viewModel: CartViewModel
-    private var cartItems: [CartItem] = []
     
     private lazy var customNavBar = CustomNavigationBar()
     
@@ -80,6 +79,7 @@ final class CartViewController: UIViewController, UITableViewDelegate, UITableVi
         view.backgroundColor = UIColor(named: "appWhiteDynamic")
         
         setupUI()
+        bindViewModel()
         viewModel.viewDidLoad()
     }
     
@@ -96,7 +96,7 @@ final class CartViewController: UIViewController, UITableViewDelegate, UITableVi
     // MARK: - UITableViewDataSource
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return cartItems.count
+        return viewModel.numberOfItems()
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -108,8 +108,9 @@ final class CartViewController: UIViewController, UITableViewDelegate, UITableVi
             return UITableViewCell()
         }
         
-        let item = cartItems[indexPath.row]
-        cell.configure(with: item)
+        if let item = viewModel.item(at: indexPath) {
+            cell.configure(with: item)
+        }
         
         return cell
     }
@@ -178,16 +179,39 @@ final class CartViewController: UIViewController, UITableViewDelegate, UITableVi
         ])
     }
     
-    // MARK: - CartView
-    func displayCartItems(_ items: [CartItem]) {
-        self.cartItems = items
-        nftListTableView.reloadData()
-    }
-
-    func updateTotal(count: Int, price: String) {
-        totalNftCountLabel.text = "\(count) NFT"
-        totalPriceLabel.text = price
-        payButton.isEnabled = count > 0
+    // MARK: - Binding
+    private func bindViewModel() {
+        viewModel.onItemsUpdate = { [weak self] in
+            guard let self else {
+                return
+            }
+            self.nftListTableView.reloadData()
+        }
+        
+        viewModel.onTotalUpdate = { [weak self] count, price in
+            guard let self else {
+                return
+            }
+            self.totalNftCountLabel.text = "\(count) NFT"
+            self.totalPriceLabel.text = price
+            self.payButton.isEnabled = count > 0
+        }
+        
+        viewModel.onLoadingStateChange = { [weak self] isLoading in
+            guard let self else {
+                return
+            }
+            
+            // swiftlint:disable:next void_function_in_ternary
+            isLoading ? self.showLoading() : self.hideLoading()
+        }
+        
+        viewModel.onError = { [weak self] errorModel in
+            guard let self else {
+                return
+            }
+            self.showError(errorModel)
+        }
     }
     
     // MARK: - Actions

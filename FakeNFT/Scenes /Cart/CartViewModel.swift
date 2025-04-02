@@ -7,13 +7,16 @@
 
 import Foundation
 
-protocol CartView: AnyObject, ErrorView, LoadingView {
-    func displayCartItems(_ items: [CartItem])
-    func updateTotal(count: Int, price: String)
-}
-
 protocol CartViewModel {
+    var onItemsUpdate: (() -> Void)? { get set }
+    var onTotalUpdate: ((Int, String) -> Void)? { get set }
+    var onLoadingStateChange: ((Bool) -> Void)? { get set }
+    var onError: ((ErrorModel) -> Void)? { get set }
+    
+    func numberOfItems() -> Int
+    func item(at indexPath: IndexPath) -> CartItem?
     func viewDidLoad()
+    func retryLoad()
 }
 
 enum CartState {
@@ -24,12 +27,15 @@ enum CartState {
 }
 
 final class CartViewModelImpl: CartViewModel {
-    // MARK: - Properties
+    var onItemsUpdate: (() -> Void)?
+    var onTotalUpdate: ((Int, String) -> Void)?
+    var onLoadingStateChange: ((Bool) -> Void)?
+    var onError: ((ErrorModel) -> Void)?
     
-    weak var view: CartView?
     private let cartService: CartService
     private var cartItems: [CartItem] = [] {
         didSet {
+            onItemsUpdate?()
             calculateTotal()
         }
     }
@@ -40,16 +46,29 @@ final class CartViewModelImpl: CartViewModel {
         }
     }
     
-    // MARK: - Init
-    
     init(cartService: CartService) {
         self.cartService = cartService
     }
     
-    // MARK: - CartViewModel
+    // MARK: - CartViewModel Protocol
     
     func viewDidLoad() {
         state = .loading
+    }
+    
+    func retryLoad() {
+        state = .loading
+    }
+    
+    func numberOfItems() -> Int {
+        return cartItems.count
+    }
+    
+    func item(at indexPath: IndexPath) -> CartItem? {
+        guard indexPath.row < cartItems.count else {
+            return nil
+        }
+        return cartItems[indexPath.row]
     }
     
     // MARK: - Private Methods
@@ -58,17 +77,19 @@ final class CartViewModelImpl: CartViewModel {
         switch state {
         case .initial:
             assertionFailure("Невозможно перейти в начальное состояние")
+            
         case .loading:
-            view?.showLoading()
+            onLoadingStateChange?(true)
             loadCartData()
+            
         case .data(let items):
-            view?.hideLoading()
-            self.cartItems = items
-            view?.displayCartItems(items)
+            onLoadingStateChange?(false)
+            cartItems = items
+            
         case .failed(let error):
             let errorModel = makeErrorModel(error)
-            view?.hideLoading()
-            view?.showError(errorModel)
+            onLoadingStateChange?(false)
+            onError?(errorModel)
         }
     }
     
@@ -77,12 +98,13 @@ final class CartViewModelImpl: CartViewModel {
             guard let self else {
                 return
             }
-            
-            switch result {
-            case .success(let items):
-                self.state = .data(items)
-            case .failure(let error):
-                self.state = .failed(error)
+            DispatchQueue.main.async {
+                switch result {
+                case .success(let items):
+                    self.state = .data(items)
+                case .failure(let error):
+                    self.state = .failed(error)
+                }
             }
         }
     }
@@ -90,10 +112,9 @@ final class CartViewModelImpl: CartViewModel {
     private func calculateTotal() {
         let totalCount = cartItems.count
         let totalPrice = cartItems.reduce(0.0) { $0 + $1.price }
-        
         let formattedPrice = String(format: "%.2f ETH", totalPrice)
         
-        view?.updateTotal(count: totalCount, price: formattedPrice)
+        onTotalUpdate?(totalCount, formattedPrice)
     }
     
     private func makeErrorModel(_ error: Error) -> ErrorModel {
@@ -110,7 +131,7 @@ final class CartViewModelImpl: CartViewModel {
             guard let self else {
                 return
             }
-            self.state = .loading
+            self.retryLoad()
         }
     }
 }
