@@ -20,6 +20,7 @@ final class CartCell: UITableViewCell {
         let image = UIImageView()
         image.contentMode = .scaleAspectFit
         image.clipsToBounds = true
+        image.layer.cornerRadius = 12
         return image
     }()
     
