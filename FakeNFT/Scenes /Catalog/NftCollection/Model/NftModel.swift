@@ -1,0 +1,18 @@
+//
+//  NftModel.swift
+//  FakeNFT
+//
+//  Created by Никита Соловьев on 03.04.2025.
+//
+
+import Foundation
+
+struct NftModel: Decodable {
+    let image: URL
+    let name: String
+    let rating: Int
+    let price: Double
+    let isLiked: Bool
+    let isAddedToCart: Bool
+    let id: String
+}
