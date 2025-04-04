@@ -1,9 +1,9 @@
 import UIKit
 
 final class TabBarController: UITabBarController {
-
+    
     private let servicesAssembly: ServicesAssembly
-
+    
     init(servicesAssembly: ServicesAssembly) {
         self.servicesAssembly = servicesAssembly
         super.init(nibName: nil, bundle: nil)
@@ -18,17 +18,31 @@ final class TabBarController: UITabBarController {
         image: UIImage(systemName: "square.stack.3d.up.fill"),
         tag: 0
     )
-
+    
+    private let cartTabBarItem: UITabBarItem = {
+        let image = UIImage(named: "tabIconCart")
+        let item = UITabBarItem(
+            title: NSLocalizedString("Tab.cart", comment: ""),
+            image: image,
+            tag: 2
+        )
+        return item
+    }()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        
         let catalogController = TestCatalogViewController(
             servicesAssembly: servicesAssembly
         )
         catalogController.tabBarItem = catalogTabBarItem
-
-        viewControllers = [catalogController]
-
-        view.backgroundColor = .systemBackground
+        
+        let cartAssembly = CartAssembly(servicesAssembly: servicesAssembly)
+        let cartController = cartAssembly.build()
+        cartController.tabBarItem = cartTabBarItem
+        
+        viewControllers = [catalogController, cartController]
+        
+        tabBar.unselectedItemTintColor = UIColor(named: "appBlackDynamic")
     }
 }
