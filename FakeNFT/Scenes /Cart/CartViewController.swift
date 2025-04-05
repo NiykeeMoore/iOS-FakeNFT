@@ -212,11 +212,30 @@ final class CartViewController: UIViewController, UITableViewDelegate, UITableVi
             }
             self.showError(errorModel)
         }
+        
+        viewModel.didSortButtonTapped = { [weak self] in
+            guard let self else {
+                return
+            }
+            
+            let alert = UIAlertController(title: "Сортировка", message: nil, preferredStyle: .actionSheet)
+            
+            for sortType in CartSortType.allCases {
+                let action = UIAlertAction(title: sortType.title, style: .default) { _ in
+                    self.viewModel.onSortStateDidChanged?(sortType)
+                }
+                alert.addAction(action)
+            }
+       
+            DispatchQueue.main.async {
+                self.present(alert, animated: true, completion: nil)
+            }
+        }
     }
     
     // MARK: - Actions
     
     @objc private func rightButtonTapped() {
-        print("Правая кнопка нажата")
+        viewModel.didSortButtonTapped?()
     }
 }
