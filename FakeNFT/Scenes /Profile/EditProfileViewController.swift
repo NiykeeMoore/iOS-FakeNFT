@@ -130,7 +130,7 @@ final class EditProfileViewController: UIViewController {
     
     // MARK: - Setup
     private func setupView() {
-        view.backgroundColor = .systemBackground
+        view.backgroundColor = UIColor(named: "appWhiteDynamic")
         
         view.addSubview(contentView)
         contentView.addSubview(closeButton)
@@ -144,7 +144,7 @@ final class EditProfileViewController: UIViewController {
         profileImageButton.addTarget(self, action: #selector(profileImageButtonTapped), for: .touchUpInside)
         
         // Set the initial image (using Kingfisher)
-        if let url = URL(string: profileData.avatar) {
+        if let url = URL(string: profileData.avatar ?? "") {
             profileImageButton.kf.setImage(with: url, for: .normal)
             profileImageButton.imageView?.contentMode = .scaleAspectFill
         }
