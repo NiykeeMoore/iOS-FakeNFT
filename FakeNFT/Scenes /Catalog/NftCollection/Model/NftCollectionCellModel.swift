@@ -1,5 +1,5 @@
 //
-//  NftModel.swift
+//  NftCollectionCellModel.swift
 //  FakeNFT
 //
 //  Created by Никита Соловьев on 03.04.2025.
@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct NftModel: Decodable {
+struct NftCollectionCellModel {
     let image: URL
     let name: String
     let rating: Int

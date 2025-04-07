@@ -106,7 +106,8 @@ final class NftCollectionViewCell: UICollectionViewCell {
         [
             nftImageView,
             likeButton,
-            ratingStackView
+            ratingStackView,
+            containerView
         ].forEach {
             contentView.addSubview($0)
             $0.translatesAutoresizingMaskIntoConstraints = false
@@ -116,7 +117,7 @@ final class NftCollectionViewCell: UICollectionViewCell {
             nftImageView.topAnchor.constraint(equalTo: contentView.topAnchor),
             nftImageView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
             nftImageView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
-            nftImageView.heightAnchor.constraint(equalTo: contentView.heightAnchor),
+            nftImageView.heightAnchor.constraint(equalTo: contentView.widthAnchor),
             
             likeButton.heightAnchor.constraint(equalToConstant: 40),
             likeButton.widthAnchor.constraint(equalToConstant: 40),
@@ -130,7 +131,7 @@ final class NftCollectionViewCell: UICollectionViewCell {
             containerView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
             containerView.topAnchor.constraint(equalTo: ratingStackView.bottomAnchor, constant: 5),
             containerView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
-            containerView.bottomAnchor.constraint(greaterThanOrEqualTo: contentView.bottomAnchor, constant: -21)
+            containerView.bottomAnchor.constraint(greaterThanOrEqualTo: contentView.bottomAnchor, constant: -10)
         ])
         
         [
@@ -159,9 +160,12 @@ final class NftCollectionViewCell: UICollectionViewCell {
         ])
     }
     
-    func configure(with model: NftModel) {
+    func configure(with model: NftCollectionCellModel) {
         nftImageView.kf.setImage(with: model.image)
         nameLabel.text = model.name
+        let priceString = String(format: "%.2f", model.price)
+        priceLabel.text = priceString + " ETH"
+        itemId = model.id
         setLikeButtonState(isLiked: model.isLiked)
         setCartButtonState(isAdded: model.isAddedToCart)
         setRating(rating: model.rating)

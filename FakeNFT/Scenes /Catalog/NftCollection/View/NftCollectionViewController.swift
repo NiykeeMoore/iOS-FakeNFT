@@ -6,26 +6,25 @@
 //
 
 import UIKit
+import Kingfisher
 
 final class NftCollectionViewController: UIViewController, LoadingView {
     
     var activityIndicator: UIActivityIndicatorView
     
     private let viewModel: NftCollectionViewModelProtocol
+//    private var collectionViewHeightConstraint: NSLayoutConstraint?
     
-    private lazy var backButton: UIButton = {
-        let button = UIButton()
-        button.setImage(
-            UIImage(systemName: "chevron.backward"),
-            for: .normal
+    private lazy var customNavigationBar: CustomNavigationBar = {
+        let navBar = CustomNavigationBar()
+        navBar.configure(
+            leftButtonImage: UIImage(systemName: "chevron.left"),
+            title: nil,
+            rightButtonImage: nil
         )
-        button.addTarget(
-            self,
-            action: #selector(backButtonTapped),
-            for: .touchUpInside
-        )
-        
-        return button
+        navBar.setLeftButtonTarget(target: self, action: #selector(backButtonTapped))
+        navBar.backgroundColor = .clear
+        return navBar
     }()
     
     private lazy var scrollView: UIScrollView = {
@@ -39,7 +38,8 @@ final class NftCollectionViewController: UIViewController, LoadingView {
     private lazy var coverImageView: UIImageView = {
         let coverImage = UIImageView()
         coverImage.contentMode = .scaleAspectFill
-        coverImage.clipsToBounds = true
+        coverImage.layer.masksToBounds = true
+        coverImage.layer.maskedCorners = [.layerMinXMaxYCorner, .layerMaxXMaxYCorner]
         coverImage.layer.cornerRadius = 12
         
         return coverImage
@@ -59,6 +59,7 @@ final class NftCollectionViewController: UIViewController, LoadingView {
         author.font = UIFont.systemFont(ofSize: 13, weight: .regular)
         author.textColor = UIColor(named: "appBlack")
         author.numberOfLines = 0
+        author.text = NSLocalizedString("Collection's author", comment: "")
         
         return author
     }()
@@ -87,18 +88,23 @@ final class NftCollectionViewController: UIViewController, LoadingView {
             frame: .zero,
             collectionViewLayout: UICollectionViewFlowLayout()
         )
-        collectionView.isScrollEnabled = false
+        
         collectionView.dataSource = self
         collectionView.delegate = self
+        collectionView.isScrollEnabled = true
+        collectionView.alwaysBounceVertical = true
         collectionView.register(
             NftCollectionViewCell.self,
-            forCellWithReuseIdentifier: NftCollectionViewCell.reuseIdentifier)
-        collectionView.backgroundColor = UIColor(named: "appWhite")
+            forCellWithReuseIdentifier: NftCollectionViewCell.reuseIdentifier
+        )
+        collectionView.backgroundColor = .clear
         
         return collectionView
     }()
     
-    init(activityIndicator: UIActivityIndicatorView, viewModel: NftCollectionViewModelProtocol) {
+    private lazy var containerView = UIView()
+    
+    init(viewModel: NftCollectionViewModelProtocol) {
         self.activityIndicator = UIActivityIndicatorView(style: .large)
         self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
@@ -110,25 +116,94 @@ final class NftCollectionViewController: UIViewController, LoadingView {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        navigationController?.setNavigationBarHidden(true, animated: false)
         setupView()
+        configureUI(with: viewModel.collectionInfo)
+        fetchNFTs()
+//        updateCollectionViewHeight()
     }
     
     @objc func backButtonTapped() {
-        dismiss(animated: true)
+        navigationController?.popViewController(animated: true)
     }
     
     @objc func openAuthorLink() {
         
     }
     
+//    private func updateCollectionViewHeight() {
+//        DispatchQueue.main.async { [weak self] in
+//            guard let self = self else {
+//                return
+//            }
+//            self.collectionView.layoutIfNeeded()
+//            self.collectionViewHeightConstraint?.constant = self.collectionView.contentSize.height
+//        }
+//    }
+    
+    private func fetchNFTs() {
+        activityIndicator.startAnimating()
+        viewModel.loadNFTs { [weak self] in
+            guard let self = self else {
+                return
+            }
+            self.activityIndicator.stopAnimating()
+            self.collectionView.reloadData()
+//            DispatchQueue.main.async {
+//                self.updateCollectionViewHeight()
+//            }
+        }
+    }
+    
+    private func loadImage(from url: URL, completion: @escaping (UIImage?) -> Void) {
+        KingfisherManager.shared.retrieveImage(with: url) { result in
+            switch result {
+            case .success(let value):
+                completion(value.image)
+            case .failure(let error):
+                print("Error loading cover image: \(error.localizedDescription)")
+                completion(nil)
+            }
+        }
+    }
+    
+    private func configureUI(with model: NftCollectionModel) {
+        if let coverURL = URL(string: model.cover) {
+            activityIndicator.startAnimating()
+            loadImage(from: coverURL) { [weak self] image in
+                DispatchQueue.main.async {
+                    guard let self = self else {
+                        return }
+                    
+                    self.activityIndicator.stopAnimating()
+                    self.coverImageView.image = image
+                }
+            }
+        }
+        collectionTitleLabel.text = model.name
+        collectionAuthorLinkLabel.text = model.author
+        collectionDescriptionLabel.text = model.description
+        
+        collectionView.reloadData()
+    }
+    
     private func setupView() {
         view.backgroundColor = UIColor(named: "appWhite")
+//        collectionViewHeightConstraint = collectionView.heightAnchor.constraint(equalToConstant: 0)
+//        collectionViewHeightConstraint?.isActive = true
+        
+        view.addSubview(customNavigationBar)
+        customNavigationBar.translatesAutoresizingMaskIntoConstraints = false
+        
         view.addSubview(scrollView)
         scrollView.translatesAutoresizingMaskIntoConstraints = false
         
+        scrollView.addSubview(containerView)
+        containerView.translatesAutoresizingMaskIntoConstraints = false
+        
+        view.bringSubviewToFront(customNavigationBar)
+        
         [
-            backButton,
             coverImageView,
             collectionTitleLabel,
             collectionAuthorLabel,
@@ -137,7 +212,7 @@ final class NftCollectionViewController: UIViewController, LoadingView {
             collectionView,
             activityIndicator
         ].forEach {
-            scrollView.addSubview($0)
+            containerView.addSubview($0)
             $0.translatesAutoresizingMaskIntoConstraints = false
         }
         
@@ -147,22 +222,28 @@ final class NftCollectionViewController: UIViewController, LoadingView {
             scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             scrollView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
             
-            backButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 9),
-            backButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 9),
-            backButton.heightAnchor.constraint(equalToConstant: 24),
-            backButton.widthAnchor.constraint(equalToConstant: 24),
+            containerView.topAnchor.constraint(equalTo: scrollView.topAnchor),
+            containerView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor),
+            containerView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor),
+            containerView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor),
+            containerView.widthAnchor.constraint(equalTo: scrollView.widthAnchor),
             
-            coverImageView.topAnchor.constraint(equalTo: scrollView.topAnchor),
-            coverImageView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor),
-            coverImageView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor),
+            customNavigationBar.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            customNavigationBar.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            customNavigationBar.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            customNavigationBar.heightAnchor.constraint(equalToConstant: 44),
+            
+            coverImageView.topAnchor.constraint(equalTo: view.topAnchor),
+            coverImageView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
+            coverImageView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor),
             coverImageView.heightAnchor.constraint(equalToConstant: 310),
             
             activityIndicator.centerYAnchor.constraint(equalTo: scrollView.centerYAnchor),
             activityIndicator.centerXAnchor.constraint(equalTo: scrollView.centerXAnchor),
             
             collectionTitleLabel.topAnchor.constraint(equalTo: coverImageView.bottomAnchor, constant: 16),
-            collectionTitleLabel.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor, constant: 16),
-            collectionTitleLabel.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor, constant: -16),
+            collectionTitleLabel.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 16),
+            collectionTitleLabel.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -16),
             
             collectionAuthorLabel.topAnchor.constraint(equalTo: collectionTitleLabel.bottomAnchor, constant: 13),
             collectionAuthorLabel.leadingAnchor.constraint(equalTo: collectionTitleLabel.leadingAnchor),
@@ -177,13 +258,12 @@ final class NftCollectionViewController: UIViewController, LoadingView {
             collectionView.topAnchor.constraint(equalTo: collectionDescriptionLabel.bottomAnchor, constant: 24),
             collectionView.leadingAnchor.constraint(equalTo: collectionTitleLabel.leadingAnchor),
             collectionView.trailingAnchor.constraint(equalTo: collectionTitleLabel.trailingAnchor),
-            collectionView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor)
+            collectionView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
         ])
     }
-    
 }
 
-//MARK: UICollectionViewDelegateFlowLayout
+// MARK: - UICollectionViewDelegateFlowLayout
 
 extension NftCollectionViewController: UICollectionViewDelegateFlowLayout {
     func collectionView(
@@ -205,26 +285,35 @@ extension NftCollectionViewController: UICollectionViewDelegateFlowLayout {
     }
 }
 
-//MARK: UICollectionViewDataSource
+// MARK: - UICollectionViewDataSource
 
 extension NftCollectionViewController: UICollectionViewDataSource {
     func collectionView(
         _ collectionView: UICollectionView,
         numberOfItemsInSection section: Int
     ) -> Int {
-        <#code#>
+        viewModel.loadedNFTs.count
     }
     
     func collectionView(
         _ collectionView: UICollectionView,
         cellForItemAt indexPath: IndexPath
     ) -> UICollectionViewCell {
-        <#code#>
+        guard let cell = collectionView.dequeueReusableCell(
+            withReuseIdentifier: NftCollectionViewCell.reuseIdentifier,
+            for: indexPath
+        ) as? NftCollectionViewCell else {
+            print("Failed to dequeue NftCollectionViewCell")
+            return UICollectionViewCell()
+        }
+        let nft = viewModel.returnCollectionCell(for: indexPath.row)
+        cell.configure(with: nft)
+        return cell
     }
     
 }
 
-//MARK: UIScrollViewDelegate
+// MARK: - UIScrollViewDelegate
 
 extension NftCollectionViewController: UIScrollViewDelegate {
     func scrollViewDidScroll(_ scrollView: UIScrollView) {

@@ -2,7 +2,7 @@
 //  NftCollectionModel.swift
 //  FakeNFT
 //
-//  Created by Никита Соловьев on 02.04.2025.
+//  Created by Никита Соловьев on 25.03.2025.
 //
 
 import Foundation

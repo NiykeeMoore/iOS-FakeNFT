@@ -46,7 +46,7 @@ final class CatalogCell: UITableViewCell {
         fatalError("init(coder:) has not been implemented")
     }
     
-    func configure(with model: NftCollectionPreviewModel) {
+    func configure(with model: NftCollectionModel) {
         loadingIndicator.startAnimating()
         if let url = URL(string: model.cover) {
             loadImage(from: url) { [weak self] image in
