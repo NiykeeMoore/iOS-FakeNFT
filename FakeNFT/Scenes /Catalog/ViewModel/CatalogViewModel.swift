@@ -8,21 +8,21 @@
 import Foundation
 
 protocol CatalogViewModelProtocol {
-    var catalogItems: [NftCollectionPreviewModel] { get }
-    func getCollections(completion: @escaping ([NftCollectionPreviewModel]) -> Void)
+    var catalogItems: [NftCollectionModel] { get }
+    func getCollections(completion: @escaping ([NftCollectionModel]) -> Void)
 }
 
 final class CatalogViewModel: CatalogViewModelProtocol {
     
-    var catalogItems: [NftCollectionPreviewModel] = []
+    var catalogItems: [NftCollectionModel] = []
     private let netWorkClient: NetworkClient
     
     init(netWorkClient: NetworkClient) {
         self.netWorkClient = netWorkClient
     }
     
-    func getCollections(completion: @escaping ([NftCollectionPreviewModel]) -> Void) {
-        netWorkClient.send(request: GetNftCollectionsRequest(), type: [NftCollectionPreviewModel].self) { [weak self] result in
+    func getCollections(completion: @escaping ([NftCollectionModel]) -> Void) {
+        netWorkClient.send(request: GetNftCollectionsRequest(), type: [NftCollectionModel].self) { [weak self] result in
             guard let self = self else {
                 return
             }

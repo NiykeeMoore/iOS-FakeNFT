@@ -13,6 +13,7 @@ final class CatalogViewController: UIViewController, LoadingView {
     var activityIndicator: UIActivityIndicatorView
     
     private var viewModel: CatalogViewModelProtocol
+    private let servicesAssembly: ServicesAssembly
     
     private lazy var tableView: UITableView = {
         let tableView = UITableView()
@@ -43,8 +44,9 @@ final class CatalogViewController: UIViewController, LoadingView {
         fetchCollections()
     }
     
-    init(viewModel: CatalogViewModelProtocol) {
+    init(viewModel: CatalogViewModelProtocol, servicesAssembly: ServicesAssembly) {
         self.viewModel = viewModel
+        self.servicesAssembly = servicesAssembly
         self.activityIndicator = UIActivityIndicatorView(style: .large)
         super.init(nibName: nil, bundle: nil)
     }
@@ -106,7 +108,15 @@ extension CatalogViewController: UITableViewDelegate {
         _ tableView: UITableView,
         didSelectRowAt indexPath: IndexPath
     ) {
-        // Переход на экран коллекции НФТ
+        let selectedCollection = viewModel.catalogItems[indexPath.row]
+        let nftService = servicesAssembly.nftService
+        let nftViewModel = NftCollectionViewModel(
+                    nftCollectionModel: selectedCollection,
+                    nftService: nftService
+                )
+        let nftController = NftCollectionViewController(viewModel: nftViewModel)
+        
+        navigationController?.pushViewController(nftController, animated: true)
     }
 }
 
