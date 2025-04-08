@@ -110,6 +110,11 @@ final class CartViewController: UIViewController, UITableViewDelegate, UITableVi
         
         if let item = viewModel.item(at: indexPath) {
             cell.configure(with: item)
+            
+            cell.didDeletionButtonTapped = { [weak self] tappedItem in
+                guard let self else { return }
+                self.showDeleteConfirmation(for: tappedItem)
+            }
         }
         
         return cell
@@ -131,6 +136,7 @@ final class CartViewController: UIViewController, UITableViewDelegate, UITableVi
         setupNavigationBar()
         setupConstraints()
     }
+    
     private func setupNavigationBar() {
         customNavBar.backgroundColor = .clear
         
@@ -231,6 +237,22 @@ final class CartViewController: UIViewController, UITableViewDelegate, UITableVi
                 self.present(alert, animated: true, completion: nil)
             }
         }
+    }
+    
+    private func showDeleteConfirmation(for item: CartItem) {
+        let deleteVC = CartDeleteItemViewController(imageURL: item.imageURL)
+
+        deleteVC.modalPresentationStyle = .overCurrentContext
+        deleteVC.modalTransitionStyle = .crossDissolve
+        
+        deleteVC.onDeleteConfirm = { [weak self] in
+            guard let self else {
+                return
+            }
+            self.viewModel.deleteItem(withId: item.id)
+        }
+        
+        present(deleteVC, animated: true)
     }
     
     // MARK: - Actions

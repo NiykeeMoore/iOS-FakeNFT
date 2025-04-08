@@ -19,6 +19,7 @@ protocol CartViewModel {
     func item(at indexPath: IndexPath) -> CartItem?
     func viewDidLoad()
     func retryLoad()
+    func deleteItem(withId id: String)
 }
 
 final class CartViewModelImpl: CartViewModel {
@@ -30,6 +31,7 @@ final class CartViewModelImpl: CartViewModel {
     var onSortStateDidChanged: ((CartSortType) -> Void)?
     
     private let cartService: CartService
+    private var cartItemsInternal: [CartItem] = []
     private var cartItems: [CartItem] = [] {
         didSet {
             onItemsUpdate?()
@@ -45,7 +47,13 @@ final class CartViewModelImpl: CartViewModel {
     
     private var sortState = CartSortType.nameDescending {
         didSet {
-            sortStateDidChanged()
+            sortItems(by: sortState, items: cartItemsInternal) { [weak self] sortedItems in
+                guard let self else {
+                    return
+                }
+                self.cartItemsInternal = sortedItems
+                self.onItemsUpdate?()
+            }
         }
     }
     
@@ -71,14 +79,47 @@ final class CartViewModelImpl: CartViewModel {
     }
     
     func numberOfItems() -> Int {
-        return cartItems.count
+        return cartItemsInternal.count
     }
     
     func item(at indexPath: IndexPath) -> CartItem? {
-        guard indexPath.row < cartItems.count else {
+        guard indexPath.row < cartItemsInternal.count else {
             return nil
         }
-        return cartItems[indexPath.row]
+        return cartItemsInternal[indexPath.row]
+    }
+    
+    func deleteItem(withId id: String) {
+        let currentIds = cartItemsInternal.map { $0.id }
+        let updatedNftIds = currentIds.filter { $0 != id }
+        
+        onLoadingStateChange?(true)
+        
+        cartService.updateOrder(with: updatedNftIds) { [weak self] result in
+            guard let self else {
+                return
+            }
+            
+            DispatchQueue.main.async {
+                switch result {
+                case .success(let updatedOrder):
+                    self.updateLocalItems(basedOn: updatedOrder.nfts)
+                    self.onLoadingStateChange?(false)
+                    
+                case .failure(let error):
+                    self.onLoadingStateChange?(false)
+                    let errorModel = self.makeErrorModel(error, context: "Удаление NFT")
+                    self.onError?(errorModel)
+                }
+            }
+        }
+    }
+    
+    private func updateLocalItems(basedOn serverNftIds: [String]) {
+        let serverSet = Set(serverNftIds)
+        let updatedItems = self.cartItemsInternal.filter { serverSet.contains($0.id) }
+        cartItemsInternal = updatedItems
+        cartItems = updatedItems
     }
     
     // MARK: - Private Methods
@@ -94,8 +135,14 @@ final class CartViewModelImpl: CartViewModel {
             
         case .data(let items):
             onLoadingStateChange?(false)
-            cartItems = items
-            sortState = .nameDescending
+            cartItemsInternal = items
+            sortItems(by: sortState, items: items) { [weak self] sortedItems in
+                guard let self else {
+                    return
+                }
+                self.cartItemsInternal = sortedItems
+                self.cartItems = sortedItems
+            }
             
         case .failed(let error):
             let errorModel = makeErrorModel(error)
@@ -121,85 +168,54 @@ final class CartViewModelImpl: CartViewModel {
     }
     
     private func calculateTotal() {
-        let totalCount = cartItems.count
-        let totalPrice = cartItems.reduce(0.0) { $0 + $1.price }
+        let totalCount = cartItemsInternal.count
+        let totalPrice = cartItemsInternal.reduce(0.0) { $0 + $1.price }
         let formattedPrice = String(format: "%.2f ETH", totalPrice)
         
         onTotalUpdate?(totalCount, formattedPrice)
     }
     
-    private func makeErrorModel(_ error: Error) -> ErrorModel {
-        let message: String
+    private func makeErrorModel(_ error: Error, context: String? = nil) -> ErrorModel {
+        let baseMessage: String
         switch error {
         case is NetworkClientError:
-            message = NSLocalizedString("Error.network", comment: "")
+            baseMessage = NSLocalizedString("Error.network", comment: "")
         default:
-            message = NSLocalizedString("Error.unknown", comment: "")
+            baseMessage = NSLocalizedString("Error.unknown", comment: "")
         }
+        
+        let message = context != nil ? "\(context ?? ""): \(baseMessage)" : baseMessage
         
         let actionText = NSLocalizedString("Error.repeat", comment: "")
         return ErrorModel(message: message, actionText: actionText) { [weak self] in
             guard let self else {
                 return
             }
-            self.retryLoad()
-        }
-    }
-    
-    private func sortStateDidChanged() {
-        switch sortState {
-        case .priceDescending:
-            sortItemsByPrice()
             
-        case .nameDescending:
-            sortItemsByName()
-            
-        case .raitingDescending:
-            sortItemsByRating()
-            
-        case .cancel:
-            break
-        }
-    }
-    
-    private func sortItemsByName() {
-        DispatchQueue.global().async { [weak self] in
-            guard let self else {
-                return
+            if context == "Удаление NFT" {
+                
+                print("Ошибка при удалении, повторная попытка не реализована в makeErrorModel")
+            } else {
+                self.retryLoad()
             }
-            var sortedItems = self.cartItems
-            sortedItems.sort { $0.name < $1.name }
-            
+        }
+    }
+    
+    private func sortItems(by sortType: CartSortType, items: [CartItem], completion: @escaping ([CartItem]) -> Void) {
+        DispatchQueue.global().async {
+            var sortedItems = items
+            switch sortType {
+            case .priceDescending:
+                sortedItems.sort { $0.price > $1.price }
+            case .nameDescending:
+                sortedItems.sort { $0.name < $1.name }
+            case .raitingDescending:
+                sortedItems.sort { $0.rating > $1.rating }
+            case .cancel:
+                break
+            }
             DispatchQueue.main.async {
-                self.cartItems = sortedItems
-            }
-        }
-    }
-    
-    private func sortItemsByPrice() {
-        DispatchQueue.global().async { [weak self] in
-            guard let self else {
-                return
-            }
-            var sortedItems = self.cartItems
-            sortedItems.sort { $0.price > $1.price }
-            
-            DispatchQueue.main.async {
-                self.cartItems = sortedItems
-            }
-        }
-    }
-    
-    private func sortItemsByRating() {
-        DispatchQueue.global().async { [weak self] in
-            guard let self else {
-                return
-            }
-            var sortedItems = self.cartItems
-            sortedItems.sort { $0.rating > $1.rating }
-            
-            DispatchQueue.main.async {
-                self.cartItems = sortedItems
+                completion(sortedItems)
             }
         }
     }

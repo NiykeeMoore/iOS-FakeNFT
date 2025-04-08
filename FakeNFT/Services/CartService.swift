@@ -8,9 +8,11 @@
 import Foundation
 
 typealias CartCompletion = (Result<[CartItem], Error>) -> Void
+typealias CartUpdateCompletion = (Result<OrderResult, Error>) -> Void
 
 protocol CartService {
     func loadOrder(completion: @escaping CartCompletion)
+    func updateOrder(with nftIds: [String], completion: @escaping CartUpdateCompletion)
 }
 
 final class CartServiceImpl: CartService {
@@ -76,6 +78,19 @@ final class CartServiceImpl: CartService {
                 )
             }
             completion(.success(cartItems))
+        }
+    }
+    
+    func updateOrder(with nftIds: [String], completion: @escaping CartUpdateCompletion) {
+        let request = UpdateOrderRequest(nftIds: nftIds)
+
+        networkClient.send(request: request, type: OrderResult.self) { result in
+            switch result {
+            case .success(let updatedOrder):
+                completion(.success(updatedOrder))
+            case .failure(let error):
+                completion(.failure(error))
+            }
         }
     }
 }
