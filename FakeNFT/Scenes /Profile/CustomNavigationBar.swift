@@ -11,20 +11,20 @@ final class CustomNavigationBar: UIView {
     
     // MARK: - UI Elements
     
-    private let leftButton: UIButton = {
+    private lazy var leftButton: UIButton = {
         let button = UIButton()
         button.tintColor = UIColor(named: "appBlackDynamic")
         return button
     }()
     
-    private let titleLabel: UILabel = {
+    private lazy var titleLabel: UILabel = {
         let label = UILabel()
         label.textAlignment = .center
         label.font = UIFont.boldSystemFont(ofSize: 17)
         return label
     }()
     
-    private let rightButton: UIButton = {
+    private lazy var rightButton: UIButton = {
         let button = UIButton()
         button.tintColor = UIColor(named: "appBlackDynamic")
         return button

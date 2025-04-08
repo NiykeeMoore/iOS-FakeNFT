@@ -18,7 +18,7 @@ final class NFTTableViewCell: UITableViewCell {
         }
     }
     
-    private let nftImageView: UIImageView = {
+    private lazy var nftImageView: UIImageView = {
         let imageView = UIImageView()
         imageView.contentMode = .scaleAspectFill
         imageView.layer.cornerRadius = 12
@@ -28,7 +28,7 @@ final class NFTTableViewCell: UITableViewCell {
         return imageView
     }()
     
-    private let likeButton: UIButton = {
+    private lazy var likeButton: UIButton = {
         let button = UIButton(type: .custom)
         let imageConfig = UIImage.SymbolConfiguration(pointSize: 20, weight: .medium)
         let image = UIImage(systemName: "heart.fill", withConfiguration: imageConfig)
@@ -38,7 +38,7 @@ final class NFTTableViewCell: UITableViewCell {
         return button
     }()
     
-    private let nameLabel: UILabel = {
+    private lazy var nameLabel: UILabel = {
         let label = UILabel()
         label.font = UIFont.systemFont(ofSize: 17, weight: .bold)
         label.numberOfLines = 1
@@ -46,9 +46,9 @@ final class NFTTableViewCell: UITableViewCell {
         return label
     }()
     
-    private let ratingView = StarRatingView()
+    private lazy var ratingView = StarRatingView()
     
-    private let authorLabel: UILabel = {
+    private lazy var authorLabel: UILabel = {
         let label = UILabel()
         label.font = UIFont.systemFont(ofSize: 13, weight: .regular)
         label.textColor = UIColor(named: "appBlackDynamic")
@@ -57,7 +57,7 @@ final class NFTTableViewCell: UITableViewCell {
         return label
     }()
     
-    private let priceValueLabel: UILabel = {
+    private lazy var priceValueLabel: UILabel = {
         let label = UILabel()
         label.font = UIFont.systemFont(ofSize: 17, weight: .bold)
         label.textAlignment = .right
@@ -66,7 +66,7 @@ final class NFTTableViewCell: UITableViewCell {
         return label
     }()
     
-    private let priceLabel: UILabel = {
+    private lazy var priceLabel: UILabel = {
         let label = UILabel()
         label.font = UIFont.systemFont(ofSize: 14)
         label.text = NSLocalizedString("MyNFT.priceLabel", comment: "")
@@ -76,7 +76,7 @@ final class NFTTableViewCell: UITableViewCell {
         return label
     }()
     
-    private let infoStackView: UIStackView = {
+    private lazy var infoStackView: UIStackView = {
         let stackView = UIStackView()
         stackView.axis = .vertical
         stackView.spacing = 4
@@ -86,7 +86,7 @@ final class NFTTableViewCell: UITableViewCell {
         return stackView
     }()
     
-    private let priceStackView: UIStackView = {
+    private lazy var priceStackView: UIStackView = {
         let stackView = UIStackView()
         stackView.axis = .vertical
         stackView.spacing = 4

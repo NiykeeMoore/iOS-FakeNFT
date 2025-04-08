@@ -7,7 +7,7 @@
 
 import UIKit
 
-class StarRatingView: UIStackView {
+final class StarRatingView: UIStackView {
     private let maxRating = 5
     
     var rating: Int = 0 {
