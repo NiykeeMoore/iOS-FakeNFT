@@ -10,7 +10,7 @@ import Foundation
 struct UpdateOrderDto: Dto {
     let nfts: [String]
     
-    func asDictionary() -> [String : String] {
+    func asDictionary() -> [String: String] {
         ["nfts": nfts.joined(separator: ",")]
     }
 }

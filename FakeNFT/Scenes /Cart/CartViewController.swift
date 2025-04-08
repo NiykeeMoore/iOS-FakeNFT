@@ -54,7 +54,7 @@ final class CartViewController: UIViewController, UITableViewDelegate, UITableVi
     
     private lazy var payButton: UIButton = {
         let button = UIButton()
-        button.setTitle("К оплате", for: .normal)
+        button.setTitle(NSLocalizedString("cart_screen_button_pay", comment: ""), for: .normal)
         button.titleLabel?.font = .boldSystemFont(ofSize: 17)
         button.setTitleColor(UIColor(named: "appWhiteDynamic"), for: .normal)
         button.backgroundColor = UIColor(named: "appBlackDynamic")
@@ -112,7 +112,9 @@ final class CartViewController: UIViewController, UITableViewDelegate, UITableVi
             cell.configure(with: item)
             
             cell.didDeletionButtonTapped = { [weak self] tappedItem in
-                guard let self else { return }
+                guard let self else {
+                    return
+                }
                 self.showDeleteConfirmation(for: tappedItem)
             }
         }

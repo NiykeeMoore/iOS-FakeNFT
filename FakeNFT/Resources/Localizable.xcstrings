@@ -49,6 +49,22 @@
         }
       }
     },
+    "cart_screen_button_pay" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pay"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "К оплате"
+          }
+        }
+      }
+    },
     "Catalog.openNft" : {
       "localizations" : {
         "en" : {
