@@ -10,6 +10,7 @@ import Foundation
 protocol NftCollectionViewModelProtocol {
     var loadedNFTs: [Nft] { get }
     var collectionInfo: NftCollectionModel { get }
+    var authorURLString: String { get }
     func loadNFTs(completion: @escaping () -> Void)
     func loadCollectionInfo(completion: @escaping () -> Void)
     func returnCollectionCell(for index: Int) -> NftCollectionCellModel
@@ -21,7 +22,7 @@ final class NftCollectionViewModel: NftCollectionViewModelProtocol {
     
     typealias Completion = (Result<Nft, Error>) -> Void
     
-    let authorURLString = "https://practicum.yandex.ru/ios-developer/"
+    var authorURLString: String = "https://practicum.yandex.ru/ios-developer/"
     
     private let nftCollectionModel: NftCollectionModel
     private let nftService: NftService
@@ -85,3 +86,4 @@ final class NftCollectionViewModel: NftCollectionViewModelProtocol {
     }
     
 }
+
