@@ -132,13 +132,17 @@ final class MyNFTsViewController: UIViewController {
         let imageConfig = UIImage.SymbolConfiguration(pointSize: 20, weight: .medium)
         let leftImage = UIImage(systemName: "chevron.left", withConfiguration: imageConfig)?
             .withTintColor(UIColor(named: "appBlackDynamic") ?? .black, renderingMode: .alwaysOriginal)
+        let rightImage = UIImage(systemName: "text.justifyleft", withConfiguration: imageConfig)?
+            .withTintColor(UIColor(named: "appBlackDynamic") ?? .black, renderingMode: .alwaysOriginal)
         
         customNavBar.configure(
             leftButtonImage: leftImage,
-            title: nil,
-            rightButtonImage: nil
+            title: isEmptyNFT ? nil : NSLocalizedString("Profile.myNFT", comment: ""),
+            rightButtonImage: isEmptyNFT ? nil : rightImage
         )
+        
         customNavBar.setLeftButtonTarget(target: self, action: #selector(backButtonTapped))
+        if !isEmptyNFT { customNavBar.setRightButtonTarget(target: self, action: #selector(sortButtonTapped)) }
         
         // Layout constraints
         customNavBar.translatesAutoresizingMaskIntoConstraints = false
@@ -151,21 +155,6 @@ final class MyNFTsViewController: UIViewController {
         } else {
             tableView.isHidden = false
             emptyNFTsLabel.isHidden = true
-            
-            let imageConfig = UIImage.SymbolConfiguration(pointSize: 20, weight: .medium)
-            let leftImage = UIImage(systemName: "chevron.left", withConfiguration: imageConfig)?
-                .withTintColor(UIColor(named: "appBlackDynamic") ?? .black, renderingMode: .alwaysOriginal)
-            let rightImage = UIImage(systemName: "text.justifyleft", withConfiguration: imageConfig)?
-                .withTintColor(UIColor(named: "appBlackDynamic") ?? .black, renderingMode: .alwaysOriginal)
-            
-            customNavBar.configure(
-                leftButtonImage: leftImage,
-                title: NSLocalizedString("Profile.myNFT", comment: ""),
-                rightButtonImage: rightImage
-            )
-            customNavBar.setLeftButtonTarget(target: self, action: #selector(backButtonTapped))
-            customNavBar.setRightButtonTarget(target: self, action: #selector(sortButtonTapped))
-            
             tableView.reloadData()
         }
     }
