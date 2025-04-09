@@ -127,15 +127,15 @@ final class NftCollectionViewController: UIViewController, LoadingView {
         fetchNFTs()
     }
     
-    @objc func backButtonTapped() {
+    @objc private func backButtonTapped() {
         navigationController?.popViewController(animated: true)
     }
     
-    @objc func authorLinkTapped() {
+    @objc private func authorLinkTapped() {
         openAuthorLink()
     }
     
-    @objc func handleScrollViewTap(_ gesture: UITapGestureRecognizer) {
+    @objc private func handleScrollViewTap(_ gesture: UITapGestureRecognizer) {
         let location = gesture.location(in: collectionAuthorLinkLabel)
         if collectionAuthorLinkLabel.bounds.contains(location) {
             authorLinkTapped()
@@ -204,16 +204,12 @@ final class NftCollectionViewController: UIViewController, LoadingView {
     
     private func setupView() {
         view.backgroundColor = UIColor(named: "appWhite")
-        
         view.addSubview(customNavigationBar)
         customNavigationBar.translatesAutoresizingMaskIntoConstraints = false
-        
         view.addSubview(scrollView)
         scrollView.translatesAutoresizingMaskIntoConstraints = false
-        
         scrollView.addSubview(containerView)
         containerView.translatesAutoresizingMaskIntoConstraints = false
-        
         [
             coverImageView,
             collectionTitleLabel,
@@ -227,52 +223,104 @@ final class NftCollectionViewController: UIViewController, LoadingView {
             $0.translatesAutoresizingMaskIntoConstraints = false
         }
         
+        setupScrollViewConsraints()
+        setupContainerViewConsraints()
+        setupCustomNavigationBarConstraints()
+        setupCoverImageViewConstraints()
+        setupActivityIndicatorConstraints()
+        setupCollectionTitleLabelConstraints()
+        setupCollectionAuthorLabelConstraints()
+        setupCollectionAuthorLinkLabelConstraints()
+        setupCollectionDescriptionLabelConstraints()
+        setupCollectionViewConstraints()
+        
+        view.bringSubviewToFront(customNavigationBar)
+    }
+    
+    // MARK: - Setup Constraints
+    private func setupScrollViewConsraints() {
         NSLayoutConstraint.activate([
             scrollView.topAnchor.constraint(equalTo: view.topAnchor),
             scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            scrollView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
-            
+            scrollView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
+        ])
+    }
+    
+    private func setupContainerViewConsraints() {
+        NSLayoutConstraint.activate([
             containerView.topAnchor.constraint(equalTo: scrollView.topAnchor),
             containerView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor),
             containerView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor),
             containerView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor),
-            containerView.widthAnchor.constraint(equalTo: scrollView.widthAnchor),
-            
+            containerView.widthAnchor.constraint(equalTo: scrollView.widthAnchor)
+        ])
+    }
+    
+    private func setupCustomNavigationBarConstraints() {
+        NSLayoutConstraint.activate([
             customNavigationBar.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             customNavigationBar.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             customNavigationBar.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            customNavigationBar.heightAnchor.constraint(equalToConstant: 44),
-            
+            customNavigationBar.heightAnchor.constraint(equalToConstant: 44)
+        ])
+    }
+    private func setupCoverImageViewConstraints() {
+        NSLayoutConstraint.activate([
             coverImageView.topAnchor.constraint(equalTo: view.topAnchor),
             coverImageView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
             coverImageView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor),
-            coverImageView.heightAnchor.constraint(equalToConstant: 310),
-            
+            coverImageView.heightAnchor.constraint(equalToConstant: 310)
+        ])
+    }
+    
+    private func setupActivityIndicatorConstraints() {
+        NSLayoutConstraint.activate([
             activityIndicator.centerYAnchor.constraint(equalTo: scrollView.centerYAnchor),
-            activityIndicator.centerXAnchor.constraint(equalTo: scrollView.centerXAnchor),
-            
+            activityIndicator.centerXAnchor.constraint(equalTo: scrollView.centerXAnchor)
+        ])
+    }
+    
+    private func setupCollectionTitleLabelConstraints() {
+        NSLayoutConstraint.activate([
             collectionTitleLabel.topAnchor.constraint(equalTo: coverImageView.bottomAnchor, constant: 16),
             collectionTitleLabel.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 16),
-            collectionTitleLabel.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -16),
-            
+            collectionTitleLabel.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -16)
+        ])
+    }
+    
+    private func setupCollectionAuthorLabelConstraints() {
+        NSLayoutConstraint.activate([
             collectionAuthorLabel.topAnchor.constraint(equalTo: collectionTitleLabel.bottomAnchor, constant: 13),
-            collectionAuthorLabel.leadingAnchor.constraint(equalTo: collectionTitleLabel.leadingAnchor),
-            
-            collectionAuthorLinkLabel.leadingAnchor.constraint(equalTo: collectionAuthorLabel.trailingAnchor, constant: 4),
-            collectionAuthorLinkLabel.bottomAnchor.constraint(equalTo: collectionAuthorLabel.bottomAnchor),
-            
+            collectionAuthorLabel.leadingAnchor.constraint(equalTo: collectionTitleLabel.leadingAnchor)
+        ])
+    }
+    
+    private func setupCollectionAuthorLinkLabelConstraints() {
+        NSLayoutConstraint.activate([
+            collectionAuthorLinkLabel.leadingAnchor.constraint(
+                equalTo: collectionAuthorLabel.trailingAnchor,
+                constant: 4
+            ),
+            collectionAuthorLinkLabel.bottomAnchor.constraint(equalTo: collectionAuthorLabel.bottomAnchor)
+        ])
+    }
+    
+    private func setupCollectionDescriptionLabelConstraints() {
+        NSLayoutConstraint.activate([
             collectionDescriptionLabel.topAnchor.constraint(equalTo: collectionAuthorLabel.bottomAnchor, constant: 5),
             collectionDescriptionLabel.leadingAnchor.constraint(equalTo: collectionTitleLabel.leadingAnchor),
-            collectionDescriptionLabel.trailingAnchor.constraint(equalTo: collectionTitleLabel.trailingAnchor),
-            
+            collectionDescriptionLabel.trailingAnchor.constraint(equalTo: collectionTitleLabel.trailingAnchor)
+        ])
+    }
+    
+    private func setupCollectionViewConstraints() {
+        NSLayoutConstraint.activate([
             collectionView.topAnchor.constraint(equalTo: collectionDescriptionLabel.bottomAnchor, constant: 24),
             collectionView.leadingAnchor.constraint(equalTo: collectionTitleLabel.leadingAnchor),
             collectionView.trailingAnchor.constraint(equalTo: collectionTitleLabel.trailingAnchor),
             collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
-        
-        view.bringSubviewToFront(customNavigationBar)
     }
 }
 
@@ -323,7 +371,6 @@ extension NftCollectionViewController: UICollectionViewDataSource {
         cell.configure(with: nft)
         return cell
     }
-    
 }
 
 // MARK: - UIScrollViewDelegate
@@ -337,9 +384,7 @@ extension NftCollectionViewController: UIScrollViewDelegate {
     
     func scrollViewShouldScrollWhenContentReceivesTouch(_ scrollView: UIScrollView, touch: UITouch) -> Bool {
         let location = touch.location(in: collectionAuthorLinkLabel)
-        if collectionAuthorLinkLabel.bounds.contains(location) {
-            return false
-        }
-        return true
+        
+        return !collectionAuthorLinkLabel.bounds.contains(location)
     }
 }

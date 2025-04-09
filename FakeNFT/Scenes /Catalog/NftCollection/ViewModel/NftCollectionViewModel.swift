@@ -44,7 +44,9 @@ final class NftCollectionViewModel: NftCollectionViewModelProtocol {
         for id in nftCollectionModel.nfts {
             group.enter()
             nftService.loadNft(id: id) { [weak self] result in
-                guard let self = self else { return }
+                guard let self = self else {
+                    return
+                }
                 switch result {
                 case .success(let nft):
                     self.loadedNFTs.append(nft)
@@ -71,8 +73,8 @@ final class NftCollectionViewModel: NftCollectionViewModelProtocol {
             name: nftForIndex.name,
             rating: nftForIndex.rating,
             price: nftForIndex.price,
-            isLiked: self.isLiked(nftForIndex.id),
-            isAddedToCart: self.isAddedToCart(nftForIndex.id),
+            isLiked: isLiked(nftForIndex.id),
+            isAddedToCart: isAddedToCart(nftForIndex.id),
             id: nftForIndex.id
         )
     }
@@ -84,6 +86,4 @@ final class NftCollectionViewModel: NftCollectionViewModelProtocol {
     func isAddedToCart(_ idOfCell: String) -> Bool {
         idAddedToCart.contains(idOfCell)
     }
-    
 }
-

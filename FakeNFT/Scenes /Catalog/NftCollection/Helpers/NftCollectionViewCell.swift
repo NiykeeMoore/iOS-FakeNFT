@@ -186,7 +186,9 @@ final class NftCollectionViewCell: UICollectionViewCell {
         }
         
         for (index, starImageView) in arrangedSubviews.enumerated() {
-            starImageView.tintColor = index < rating ? UIColor(named: "appYellow") : UIColor(named: "appLightGrayDynamic")
+            starImageView.tintColor = index < rating
+            ? UIColor(named: "appYellow")
+            : UIColor(named: "appLightGrayDynamic")
         }
     }
 }

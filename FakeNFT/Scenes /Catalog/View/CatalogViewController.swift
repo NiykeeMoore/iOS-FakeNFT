@@ -9,7 +9,7 @@ import UIKit
 import ProgressHUD
 
 final class CatalogViewController: UIViewController, LoadingView {
-
+    
     var activityIndicator: UIActivityIndicatorView
     
     private var viewModel: CatalogViewModelProtocol
@@ -111,9 +111,9 @@ extension CatalogViewController: UITableViewDelegate {
         let selectedCollection = viewModel.catalogItems[indexPath.row]
         let nftService = servicesAssembly.nftService
         let nftViewModel = NftCollectionViewModel(
-                    nftCollectionModel: selectedCollection,
-                    nftService: nftService
-                )
+            nftCollectionModel: selectedCollection,
+            nftService: nftService
+        )
         let nftController = NftCollectionViewController(viewModel: nftViewModel)
         
         navigationController?.pushViewController(nftController, animated: true)
@@ -145,7 +145,7 @@ extension CatalogViewController: UITableViewDataSource {
         cell.configure(with: catalogItem)
         cell.selectionStyle = .none
         cell.backgroundColor = UIColor(named: "appWhite")
-
+        
         return cell
     }
 }
