@@ -10,17 +10,21 @@ struct ProfileRequest: NetworkRequest {
 }
 
 struct ProfileDtoObject: Dto {
-    let avatar: String?
     let name: String?
+    let avatar: String?
     let description: String?
     let website: String?
+    let nfts: [String]?
+    let likes: [String]?
     
     func asDictionary() -> [String: String] {
         [
-            "avatar": avatar ?? "",
             "name": name ?? "",
+            "avatar": avatar ?? "",
             "description": description ?? "",
-            "website": website ?? ""
+            "website": website ?? "",
+            "nfts": nfts?.joined(separator: ",") ?? "[]",
+            "likes": likes?.joined(separator: ",") ?? "[]"
         ]
     }
 }

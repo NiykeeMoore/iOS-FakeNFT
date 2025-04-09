@@ -28,8 +28,12 @@ final class TabBarController: UITabBarController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        let profileViewModel = ProfileViewModel(profileService: servicesAssembly.profileService)
+        let profileViewModel = ProfileViewModel(
+            profileService: servicesAssembly.profileService,
+            nftService: servicesAssembly.nftService
+        )
         let profileController = ProfileViewController(viewModel: profileViewModel)
+        let profileNavController = UINavigationController(rootViewController: profileController)
         profileController.tabBarItem = profileTabBarItem
 
         let catalogController = TestCatalogViewController(
@@ -37,7 +41,7 @@ final class TabBarController: UITabBarController {
         )
         catalogController.tabBarItem = catalogTabBarItem
 
-        viewControllers = [profileController, catalogController]
+        viewControllers = [profileNavController, catalogController]
 
         view.backgroundColor = .systemBackground
     }

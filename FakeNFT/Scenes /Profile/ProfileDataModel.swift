@@ -8,11 +8,11 @@
 import Foundation
 
 struct ProfileData: Codable {
-    let id: String
-    var avatar: String
-    var name: String
+    var id: String?
+    var avatar: String?
+    var name: String?
     var description: String?
-    var website: String
-    var nfts: [String]
-    var likes: [String]
+    var website: String?
+    var nfts: [String]?
+    var likes: [String]?
 }

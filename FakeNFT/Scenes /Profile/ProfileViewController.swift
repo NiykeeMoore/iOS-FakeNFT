@@ -136,7 +136,8 @@ final class ProfileViewController: UIViewController {
     }
     
     private func setupView() {
-        view.backgroundColor = .white
+        navigationController?.setNavigationBarHidden(true, animated: false)
+        view.backgroundColor = UIColor(named: "appWhiteDynamic")
         
         view.addSubview(contentView)
         view.addSubview(activityIndicator)
@@ -158,7 +159,7 @@ final class ProfileViewController: UIViewController {
     }
     
     private func updateUI(with profileData: ProfileData) {
-        profileImageView.kf.setImage(with: URL(string: profileData.avatar))
+        profileImageView.kf.setImage(with: URL(string: profileData.avatar ?? ""))
         nameLabel.text = profileData.name
         descriptionLabel.text = profileData.description
         websiteLabel.text = profileData.website
@@ -170,7 +171,7 @@ final class ProfileViewController: UIViewController {
     
     private func showErrorAlert(errorDescription: String) {
         let alert = UIAlertController(
-            title: "Ошибка",
+            title: NSLocalizedString("Error.title", comment: ""),
             message: errorDescription,
             preferredStyle: .alert
         )
@@ -256,7 +257,7 @@ extension ProfileViewController: UITableViewDataSource, UITableViewDelegate {
         
         switch indexPath.row {
         case 0:
-            print("Мои NFT tapped")
+            showMyNFTs()
         case 1:
             print("Избранные NFT tapped")
         case 2:
@@ -264,6 +265,28 @@ extension ProfileViewController: UITableViewDataSource, UITableViewDelegate {
         default:
             break
         }
+    }
+    
+    func showMyNFTs() {
+        guard let profileData = viewModel.profileData else {
+            return
+        }
+        
+        let myNFTsVM = MyNFTsViewModel(
+            profileService: viewModel.profileService,
+            profileData: profileData,
+            onClose: myNFTSClosed
+        )
+        let myNFTsVC = MyNFTsViewController(viewModel: myNFTsVM)
+        
+        myNFTsVC.hidesBottomBarWhenPushed = true
+        self.navigationController?.pushViewController(myNFTsVC, animated: true)
+    }
+    
+    func myNFTSClosed(likes: [String]) {
+        viewModel.updateLikes(likes)
+        tableData = viewModel.getTableData()
+        tableView.reloadData()
     }
     
     func openWebsite() {

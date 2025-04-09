@@ -10,7 +10,7 @@ import UIKit
 final class ProfileTableViewCell: UITableViewCell {
     
     // MARK: - Properties
-    private let customAccessoryView: UIImageView = {
+    private lazy var customAccessoryView: UIImageView = {
         let imageView = UIImageView()
         imageView.translatesAutoresizingMaskIntoConstraints = false
         let config = UIImage.SymbolConfiguration(pointSize: 17, weight: .regular)
