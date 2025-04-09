@@ -8,11 +8,13 @@
 import Foundation
 
 struct NftCollectionModel: Decodable {
-    let id: String
-    let nfts: [String]
     let name: String
     let cover: String
-    let author: String
+    let nfts: [String]
+    let id: String
     let description: String
-    var count: Int { nfts.count }
+    let author: String
+    var count: Int {
+        nfts.count
+    }
 }
