@@ -21,7 +21,7 @@ final class NftCollectionViewCell: UICollectionViewCell {
         imageView.contentMode = .scaleAspectFit
         imageView.layer.cornerRadius = 12
         imageView.layer.masksToBounds = true
-        
+
         return imageView
     }()
     
@@ -95,23 +95,39 @@ final class NftCollectionViewCell: UICollectionViewCell {
     }
     
     @objc func likeButtonTapped() {
+        print("Like button tapped")
+        self.isItemLiked.toggle()
+        setLikeButtonState(isLiked: self.isItemLiked)
         
+        let likesService = LikesService(networkClient: DefaultNetworkClient())
+        likesService.getLikes { [weak self] likes in
+            guard let self = self,
+                  let likes = likes else {
+                return
+            }
+            if self.isItemLiked {
+                self.addItemToLikes(likesService, likes)
+            } else {
+                self.removeItemFromLikes(likesService, likes)
+            }
+        }
     }
     
     @objc func cartButtonTapped() {
-        
+        print("Cart button tapped")
     }
     
     private func setupLayout() {
         [
             nftImageView,
-            likeButton,
             ratingStackView,
-            containerView
+            containerView,
+            likeButton
         ].forEach {
             contentView.addSubview($0)
             $0.translatesAutoresizingMaskIntoConstraints = false
         }
+        contentView.bringSubviewToFront(likeButton)
         
         NSLayoutConstraint.activate([
             nftImageView.topAnchor.constraint(equalTo: contentView.topAnchor),
@@ -169,6 +185,36 @@ final class NftCollectionViewCell: UICollectionViewCell {
         setLikeButtonState(isLiked: model.isLiked)
         setCartButtonState(isAdded: model.isAddedToCart)
         setRating(rating: model.rating)
+    }
+    
+    private func addItemToLikes(_ likesService: LikesService, _ likes: Likes) {
+        var updatedLikes = likes.likes
+        updatedLikes.append(self.itemId)
+        likesService.setLike(nftsIds: updatedLikes) { error in
+            if error != nil {
+                return
+            }
+            DispatchQueue.main.async {
+                self.setLikeButtonState(isLiked: true)
+                self.isItemLiked = true
+            }
+        }
+    }
+    
+    private func removeItemFromLikes(_ likesService: LikesService, _ likes: Likes) {
+        var updatedLikes = likes.likes
+        if let index = updatedLikes.firstIndex(of: self.itemId) {
+            updatedLikes.remove(at: index)
+        }
+        likesService.setLike(nftsIds: updatedLikes) { error in
+            if error != nil {
+                return
+            }
+            DispatchQueue.main.async {
+                self.setLikeButtonState(isLiked: false)
+                self.isItemLiked = false
+            }
+        }
     }
     
     private func setLikeButtonState(isLiked: Bool) {

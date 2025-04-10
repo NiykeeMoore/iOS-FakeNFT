@@ -387,4 +387,16 @@ extension NftCollectionViewController: UIScrollViewDelegate {
         
         return !collectionAuthorLinkLabel.bounds.contains(location)
     }
+    
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {
+            let location = touch.location(in: collectionView)
+            if let indexPath = collectionView.indexPathForItem(at: location),
+               let cell = collectionView.cellForItem(at: indexPath) as? NftCollectionViewCell {
+                let likeButtonLocation = touch.location(in: cell)
+                if cell.subviews.contains(where: { $0.frame.contains(likeButtonLocation) && $0 is UIButton }) {
+                    return false
+                }
+            }
+            return true
+        }
 }
