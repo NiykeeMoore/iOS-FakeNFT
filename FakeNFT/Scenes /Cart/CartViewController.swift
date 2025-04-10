@@ -54,7 +54,7 @@ final class CartViewController: UIViewController, UITableViewDelegate, UITableVi
     
     private lazy var payButton: UIButton = {
         let button = UIButton()
-        button.setTitle("К оплате", for: .normal)
+        button.setTitle(NSLocalizedString("cart_screen_button_pay", comment: ""), for: .normal)
         button.titleLabel?.font = .boldSystemFont(ofSize: 17)
         button.setTitleColor(UIColor(named: "appWhiteDynamic"), for: .normal)
         button.backgroundColor = UIColor(named: "appBlackDynamic")
@@ -110,6 +110,13 @@ final class CartViewController: UIViewController, UITableViewDelegate, UITableVi
         
         if let item = viewModel.item(at: indexPath) {
             cell.configure(with: item)
+            
+            cell.didDeletionButtonTapped = { [weak self] tappedItem in
+                guard let self else {
+                    return
+                }
+                self.showDeleteConfirmation(for: tappedItem)
+            }
         }
         
         return cell
@@ -131,6 +138,7 @@ final class CartViewController: UIViewController, UITableViewDelegate, UITableVi
         setupNavigationBar()
         setupConstraints()
     }
+    
     private func setupNavigationBar() {
         customNavBar.backgroundColor = .clear
         
@@ -212,11 +220,46 @@ final class CartViewController: UIViewController, UITableViewDelegate, UITableVi
             }
             self.showError(errorModel)
         }
+        
+        viewModel.didSortButtonTapped = { [weak self] in
+            guard let self else {
+                return
+            }
+            
+            let alert = UIAlertController(title: "Сортировка", message: nil, preferredStyle: .actionSheet)
+            
+            for sortType in CartSortType.allCases {
+                let action = UIAlertAction(title: sortType.title, style: .default) { _ in
+                    self.viewModel.onSortStateDidChanged?(sortType)
+                }
+                alert.addAction(action)
+            }
+       
+            DispatchQueue.main.async {
+                self.present(alert, animated: true, completion: nil)
+            }
+        }
+    }
+    
+    private func showDeleteConfirmation(for item: CartItem) {
+        let deleteVC = CartDeleteItemViewController(imageURL: item.imageURL)
+
+        deleteVC.modalPresentationStyle = .overCurrentContext
+        deleteVC.modalTransitionStyle = .crossDissolve
+        
+        deleteVC.onDeleteConfirm = { [weak self] in
+            guard let self else {
+                return
+            }
+            self.viewModel.deleteItem(withId: item.id)
+        }
+        
+        present(deleteVC, animated: true)
     }
     
     // MARK: - Actions
     
     @objc private func rightButtonTapped() {
-        print("Правая кнопка нажата")
+        viewModel.didSortButtonTapped?()
     }
 }

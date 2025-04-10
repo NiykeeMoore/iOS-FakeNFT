@@ -10,12 +10,12 @@ import Kingfisher
 
 final class CartCell: UITableViewCell {
     // MARK: - Properties
+    var didDeletionButtonTapped: ((CartItem) -> Void)?
     
     static let reuseIdentifier = String(describing: CartCell.self)
-    private var currentItemId: String?
+    private var currentItem: CartItem?
     
     // MARK: - UI Components
-    
     private lazy var itemImageView: UIImageView = {
         let image = UIImageView()
         image.contentMode = .scaleAspectFit
@@ -55,11 +55,11 @@ final class CartCell: UITableViewCell {
         let button = UIButton()
         button.setImage(UIImage(named: "iconCartItemRemove"), for: .normal)
         button.tintColor = UIColor(named: "appBlackDynamic")
+        button.addTarget(self, action: #selector(removeFromCartButtonTapped), for: .touchUpInside)
         return button
     }()
     
     // MARK: - Initialization
-    
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         setupUI()
@@ -71,10 +71,9 @@ final class CartCell: UITableViewCell {
     }
     
     // MARK: - UI Setup
-    
     private func setupUI() {
         contentView.backgroundColor = .clear
-        configureRating(3)
+        
         [
             itemImageView,
             itemNameLabel,
@@ -89,7 +88,6 @@ final class CartCell: UITableViewCell {
     }
     
     // MARK: - Constraints
-    
     private func setupConstraints() {
         NSLayoutConstraint.activate([
             itemImageView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 16),
@@ -122,7 +120,7 @@ final class CartCell: UITableViewCell {
     }
     
     func configure(with item: CartItem) {
-        currentItemId = item.id
+        currentItem = item
         itemNameLabel.text = item.name
         itemPriceValueLabel.text = String(format: "%.2f ETH", item.price)
         configureRating(item.rating)
@@ -139,7 +137,6 @@ final class CartCell: UITableViewCell {
     }
     
     // MARK: - Private methods
-    
     private func configureRating(_ rating: Int) {
         itemRatingStackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
         for index in 0..<5 {
@@ -151,6 +148,13 @@ final class CartCell: UITableViewCell {
             imageView.contentMode = .scaleAspectFit
             imageView.clipsToBounds = true
             itemRatingStackView.addArrangedSubview(imageView)
+        }
+    }
+    
+    // MARK: - Actions
+    @objc private func removeFromCartButtonTapped() {
+        if let item = currentItem {
+            didDeletionButtonTapped?(item)
         }
     }
 }
