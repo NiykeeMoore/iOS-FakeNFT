@@ -8,11 +8,10 @@
 import Foundation
 
 struct GetNftCollectionsRequest: NetworkRequest {
-    
     var endpoint: URL? {
         URL(string: "\(RequestConstants.baseURL)/api/v1/collections")
     }
     var httpMethod: HttpMethod = .get
-    var dto: Encodable?
+    var dto: (any Dto)?
     var httpBody: String?
 }
