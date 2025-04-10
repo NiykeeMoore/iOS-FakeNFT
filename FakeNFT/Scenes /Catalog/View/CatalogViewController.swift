@@ -15,6 +15,18 @@ final class CatalogViewController: UIViewController, LoadingView {
     private var viewModel: CatalogViewModelProtocol
     private let servicesAssembly: ServicesAssembly
     
+    private lazy var customNavigationBar: CustomNavigationBar = {
+        let navBar = CustomNavigationBar()
+        navBar.configure(
+            leftButtonImage: nil,
+            title: nil,
+            rightButtonImage: UIImage(named: "iconNavBarSort")
+        )
+        navBar.setRightButtonTarget(target: self, action: #selector(sortButtonTapped))
+        navBar.backgroundColor = .clear
+        return navBar
+    }()
+    
     private lazy var tableView: UITableView = {
         let tableView = UITableView()
         tableView.backgroundColor = UIColor(named: "appWhite")
@@ -39,7 +51,7 @@ final class CatalogViewController: UIViewController, LoadingView {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        navigationController?.setNavigationBarHidden(true, animated: false)
         setupView()
         fetchCollections()
     }
@@ -59,17 +71,67 @@ final class CatalogViewController: UIViewController, LoadingView {
         fetchCollections()
     }
     
+    @objc func sortButtonTapped() {
+        let sortingAlert  = UIAlertController(
+            title: NSLocalizedString("Sorting", comment: ""),
+            message: nil,
+            preferredStyle: .actionSheet
+        )
+        
+        sortingAlert.addAction(
+            UIAlertAction(
+                title: NSLocalizedString("Sorting.byName", comment: ""),
+                style: .default
+            ) { [weak self] _ in
+                guard let self = self else {
+                    return
+                }
+                self.viewModel.sortType = .byName
+                _ = self.viewModel.sortCatalog(by: self.viewModel.sortType)
+                self.tableView.reloadData()
+            }
+        )
+        
+        sortingAlert.addAction(
+            UIAlertAction(
+                title: NSLocalizedString("Sorting.byQuantity", comment: ""),
+                style: .default
+            ) { [weak self] _ in
+                guard let self = self else {
+                    return
+                }
+                self.viewModel.sortType = .byQuantity
+                _ = self.viewModel.sortCatalog(by: self.viewModel.sortType)
+                self.tableView.reloadData()
+            }
+        )
+        
+        sortingAlert.addAction(
+            UIAlertAction(
+                title: NSLocalizedString("Sorting.cancel", comment: ""),
+                style: .cancel
+            )
+        )
+        
+        present(sortingAlert, animated: true)
+    }
+    
     private func setupView() {
-        [tableView, activityIndicator].forEach {
+        [tableView, customNavigationBar, activityIndicator].forEach {
             view.addSubview($0)
             $0.translatesAutoresizingMaskIntoConstraints = false
         }
         
         NSLayoutConstraint.activate([
-            tableView.topAnchor.constraint(equalTo: view.topAnchor),
+            customNavigationBar.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            customNavigationBar.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            customNavigationBar.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            customNavigationBar.heightAnchor.constraint(equalToConstant: 44),
+            
+            tableView.topAnchor.constraint(equalTo: customNavigationBar.bottomAnchor),
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            tableView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
             
             activityIndicator.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             activityIndicator.centerYAnchor.constraint(equalTo: view.centerYAnchor)
@@ -81,9 +143,11 @@ final class CatalogViewController: UIViewController, LoadingView {
             return
         }
         activityIndicator.startAnimating()
+        customNavigationBar.isHidden = true
         
         viewModel.getCollections { [weak self] _ in
             self?.activityIndicator.stopAnimating()
+            self?.customNavigationBar.isHidden = false
             guard let self = self else {
                 return
             }
