@@ -8,55 +8,58 @@
 import Foundation
 
 final class LikesService {
-   
     private let networkClient: NetworkClient
     
     init(networkClient: NetworkClient) {
         self.networkClient = networkClient
     }
     
-    func getLikes(completion: @escaping (Likes?) -> Void) {
-        networkClient.send(request: LikesRequest(httpMethod: .get), type: Likes.self) { [weak self] result in
+    func getLikes(completion: @escaping ([String]?) -> Void) {
+        let request = LikesRequest(httpMethod: .get)
+        networkClient.send(request: request, type: Profile.self) { [weak self] result in
             guard let self = self else {
                 return
             }
             DispatchQueue.main.async {
                 switch result {
-                case .success(let likes):
-                    completion(likes)
+                case .success(let profile):
+                    print("Successfully fetched profile: \(profile)")
+                    completion(profile.likes)
                 case .failure(let error):
+                    print("Failed to get profile with error: \(error)")
+                    if let networkError = error as? NetworkClientError {
+                        switch networkError {
+                        case .httpStatusCode(let code):
+                            print("HTTP status code: \(code)")
+                        case .urlRequestError(let underlyingError):
+                            print("URL request error: \(underlyingError)")
+                        case .urlSessionError:
+                            print("URL session error")
+                        case .parsingError:
+                            print("Parsing error")
+                        }
+                    }
                     completion(nil)
                 }
             }
         }
     }
     
-    func setLike(nftsIds: [String], completion: @escaping (Error?) -> Void) {
-          let nftsString = nftsIds.joined(separator: ",")
-          let bodyString = "nfts=\(nftsString)"
-        guard let bodyData = bodyString.data(using: .utf8) else {
-            return
+    func setLike(nftsIds: [String], completion: @escaping (Result<Profile, Error>) -> Void) {
+        let request = LikesRequest(httpMethod: .put, nftsIds: nftsIds)
+        networkClient.send(request: request, type: Profile.self) { [weak self] result in
+            guard let self = self else {
+                return
+            }
+            DispatchQueue.main.async {
+                switch result {
+                case .success(let profile):
+                    completion(.success(profile))
+                case .failure(let error):
+                    print("Failed to set like: \(error)")
+                    completion(.failure(error))
+                }
+            }
         }
-
-        guard let url = URL(string: "\(RequestConstants.baseURL)/api/v1/profile/1") else {
-            return
-        }
-          var request = URLRequest(url: url)
-          request.httpMethod = "PUT"
-          request.setValue("application/json", forHTTPHeaderField: "Accept")
-          request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
-        request.setValue("\(RequestConstants.token)", forHTTPHeaderField: "X-Practicum-Mobile-Token")
-          if nftsIds.count != 0 {
-              request.httpBody = bodyData
-          }
-
-          let task = URLSession.shared.dataTask(with: request) { _, _, error in
-              if let error = error {
-                  completion(error)
-                  return
-              }
-              completion(nil)
-          }
-          task.resume()
-      }
+    }
 }
