@@ -11,11 +11,14 @@ protocol NftCollectionViewModelProtocol {
     var loadedNFTs: [Nft] { get }
     var collectionInfo: NftCollectionModel { get }
     var authorURLString: String { get }
+    
     func loadNFTs(completion: @escaping () -> Void)
     func loadCollectionInfo(completion: @escaping () -> Void)
     func returnCollectionCell(for index: Int) -> NftCollectionCellModel
     func isLiked(_ idOfCell: String) -> Bool
     func isAddedToCart(_ idOfCell: String) -> Bool
+    func toggleLike(for nftId: String)
+    func toggleCart(for nftId: String)
 }
 
 final class NftCollectionViewModel: NftCollectionViewModelProtocol {
@@ -86,4 +89,22 @@ final class NftCollectionViewModel: NftCollectionViewModelProtocol {
     func isAddedToCart(_ idOfCell: String) -> Bool {
         idAddedToCart.contains(idOfCell)
     }
+    
+    func toggleLike(for nftId: String) {
+            if isLiked(nftId) {
+                idLikes.remove(nftId)
+            } else {
+                idLikes.insert(nftId)
+            }
+            // Здесь можно добавить вызов сервиса для сохранения изменений
+        }
+    
+    func toggleCart(for nftId: String) {
+            if isAddedToCart(nftId) {
+                idAddedToCart.remove(nftId)
+            } else {
+                idAddedToCart.insert(nftId)
+            }
+            // Здесь можно добавить вызов сервиса для сохранения изменений
+        }
 }

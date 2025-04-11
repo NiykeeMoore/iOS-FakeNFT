@@ -34,9 +34,13 @@ final class LikesService {
     func setLike(nftsIds: [String], completion: @escaping (Error?) -> Void) {
           let nftsString = nftsIds.joined(separator: ",")
           let bodyString = "nfts=\(nftsString)"
-          guard let bodyData = bodyString.data(using: .utf8) else { return }
+        guard let bodyData = bodyString.data(using: .utf8) else {
+            return
+        }
 
-        guard let url = URL(string: "\(RequestConstants.baseURL)/api/v1/profile/1") else { return }
+        guard let url = URL(string: "\(RequestConstants.baseURL)/api/v1/profile/1") else {
+            return
+        }
           var request = URLRequest(url: url)
           request.httpMethod = "PUT"
           request.setValue("application/json", forHTTPHeaderField: "Accept")

@@ -15,6 +15,8 @@ final class NftCollectionViewCell: UICollectionViewCell {
     private var isItemInCart: Bool = false
     private var isItemLiked: Bool = false
     private var itemId: String = ""
+    var onLikeButtonTapped: ((String) -> Void)?
+    var onCartButtonTapped: ((String) -> Void)?
     
     private lazy var nftImageView: UIImageView = {
         let imageView = UIImageView()
@@ -83,8 +85,6 @@ final class NftCollectionViewCell: UICollectionViewCell {
         return button
     }()
     
-    private lazy var containerView = UIView()
-    
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupLayout()
@@ -95,7 +95,6 @@ final class NftCollectionViewCell: UICollectionViewCell {
     }
     
     @objc func likeButtonTapped() {
-        print("Like button tapped")
         self.isItemLiked.toggle()
         setLikeButtonState(isLiked: self.isItemLiked)
         
@@ -114,67 +113,44 @@ final class NftCollectionViewCell: UICollectionViewCell {
     }
     
     @objc func cartButtonTapped() {
-        print("Cart button tapped")
+        
     }
     
     private func setupLayout() {
-        [
-            nftImageView,
-            ratingStackView,
-            containerView,
-            likeButton
-        ].forEach {
-            contentView.addSubview($0)
-            $0.translatesAutoresizingMaskIntoConstraints = false
-        }
-        contentView.bringSubviewToFront(likeButton)
-        
-        NSLayoutConstraint.activate([
-            nftImageView.topAnchor.constraint(equalTo: contentView.topAnchor),
-            nftImageView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
-            nftImageView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
-            nftImageView.heightAnchor.constraint(equalTo: contentView.widthAnchor),
-            
-            likeButton.heightAnchor.constraint(equalToConstant: 40),
-            likeButton.widthAnchor.constraint(equalToConstant: 40),
-            likeButton.topAnchor.constraint(equalTo: contentView.topAnchor),
-            likeButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
-            
-            ratingStackView.topAnchor.constraint(equalTo: nftImageView.bottomAnchor, constant: 8),
-            ratingStackView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
-            ratingStackView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -40),
-            
-            containerView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
-            containerView.topAnchor.constraint(equalTo: ratingStackView.bottomAnchor, constant: 5),
-            containerView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
-            containerView.bottomAnchor.constraint(greaterThanOrEqualTo: contentView.bottomAnchor, constant: -10)
-        ])
-        
-        [
-            nameLabel,
-            priceLabel,
-            cartButton
-        ].forEach {
-            containerView.addSubview($0)
-            $0.translatesAutoresizingMaskIntoConstraints = false
-        }
-        
-        NSLayoutConstraint.activate([
-            
-            cartButton.trailingAnchor.constraint(equalTo: containerView.trailingAnchor),
-            cartButton.centerYAnchor.constraint(equalTo: containerView.centerYAnchor),
-            cartButton.widthAnchor.constraint(equalToConstant: 40),
-            
-            nameLabel.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
-            nameLabel.topAnchor.constraint(equalTo: containerView.topAnchor),
-            nameLabel.trailingAnchor.constraint(equalTo: cartButton.leadingAnchor),
-            
-            priceLabel.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
-            priceLabel.bottomAnchor.constraint(equalTo: containerView.bottomAnchor),
-            priceLabel.topAnchor.constraint(equalTo: nameLabel.bottomAnchor, constant: 4),
-            priceLabel.trailingAnchor.constraint(equalTo: cartButton.leadingAnchor)
-        ])
-    }
+           [nftImageView, likeButton, ratingStackView, nameLabel, priceLabel, cartButton].forEach {
+               contentView.addSubview($0)
+               $0.translatesAutoresizingMaskIntoConstraints = false
+           }
+           
+           NSLayoutConstraint.activate([
+               nftImageView.topAnchor.constraint(equalTo: contentView.topAnchor),
+               nftImageView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+               nftImageView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
+               nftImageView.heightAnchor.constraint(equalTo: contentView.widthAnchor),
+               
+               likeButton.topAnchor.constraint(equalTo: contentView.topAnchor),
+               likeButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
+               likeButton.widthAnchor.constraint(equalToConstant: 40),
+               likeButton.heightAnchor.constraint(equalToConstant: 40),
+               
+               ratingStackView.topAnchor.constraint(equalTo: nftImageView.bottomAnchor, constant: 8),
+               ratingStackView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+               ratingStackView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -40),
+               
+               nameLabel.topAnchor.constraint(equalTo: ratingStackView.bottomAnchor, constant: 8),
+               nameLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+               nameLabel.trailingAnchor.constraint(equalTo: cartButton.leadingAnchor, constant: -8),
+               
+               priceLabel.topAnchor.constraint(equalTo: nameLabel.bottomAnchor, constant: 4),
+               priceLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+               priceLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -8),
+               priceLabel.trailingAnchor.constraint(equalTo: cartButton.leadingAnchor, constant: -8),
+               
+               cartButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
+               cartButton.centerYAnchor.constraint(equalTo: priceLabel.centerYAnchor),
+               cartButton.widthAnchor.constraint(equalToConstant: 40)
+           ])
+       }
     
     func configure(with model: NftCollectionCellModel) {
         nftImageView.kf.setImage(with: model.image)
