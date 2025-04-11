@@ -18,13 +18,24 @@ struct ProfileDtoObject: Dto {
     let likes: [String]?
     
     func asDictionary() -> [String: String] {
-        [
-            "name": name ?? "",
-            "avatar": avatar ?? "",
-            "description": description ?? "",
-            "website": website ?? "",
-            "nfts": nfts?.joined(separator: ",") ?? "[]",
-            "likes": likes?.joined(separator: ",") ?? "[]"
-        ]
+        var result = [:] as [String: String]
+        
+        if let name {
+            result["name"] = name
+        }
+        if let avatar {
+            result["avatar"] = avatar
+        }
+        if let description {
+            result["description"] = description
+        }
+        if let website {
+            result["website"] = website
+        }
+        if let likes {
+            result["likes"] = likes.isEmpty ? nil : likes.joined(separator: ",")
+        }
+        
+        return result
     }
 }

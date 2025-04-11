@@ -70,22 +70,25 @@ final class CustomNavigationBar: UIView {
     
     // MARK: - Public methods
     
-    /// Метод для настройки заголовка и изображения  кнопок
-    func configure(leftButtonImage: UIImage?, title: String?, rightButtonImage: UIImage?) {
-        leftButton.setImage(leftButtonImage, for: .normal)
+    func configureLeftButton(image: UIImage?, target: Any?, action: Selector) {
+        leftButton.setImage(image, for: .normal)
+        if image != nil {
+            leftButton.addTarget(target, action: action, for: .touchUpInside)
+        } else {
+            leftButton.removeTarget(nil, action: nil, for: .allEvents)
+        }
+    }
+    
+    func configureRightButton(image: UIImage?, target: Any?, action: Selector) {
+        rightButton.setImage(image, for: .normal)
+        if image != nil {
+            rightButton.addTarget(target, action: action, for: .touchUpInside)
+        } else {
+            rightButton.removeTarget(nil, action: nil, for: .allEvents)
+        }
+    }
+    
+    func configureTitle(_ title: String?) {
         titleLabel.text = title
-        rightButton.setImage(rightButtonImage, for: .normal)
-    }
-    
-    // MARK: - Actions
-    
-    /// Установка обработчика для левой кнопки
-    func setLeftButtonTarget(target: Any?, action: Selector) {
-        leftButton.addTarget(target, action: action, for: .touchUpInside)
-    }
-    
-    /// Установка обработчика для правой кнопки
-    func setRightButtonTarget(target: Any?, action: Selector) {
-        rightButton.addTarget(target, action: action, for: .touchUpInside)
     }
 }

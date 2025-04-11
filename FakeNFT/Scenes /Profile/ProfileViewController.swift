@@ -259,7 +259,7 @@ extension ProfileViewController: UITableViewDataSource, UITableViewDelegate {
         case 0:
             showMyNFTs()
         case 1:
-            print("Избранные NFT tapped")
+            showLikedNFTs()
         case 2:
             openWebsite()
         default:
@@ -281,6 +281,22 @@ extension ProfileViewController: UITableViewDataSource, UITableViewDelegate {
         
         myNFTsVC.hidesBottomBarWhenPushed = true
         self.navigationController?.pushViewController(myNFTsVC, animated: true)
+    }
+    
+    func showLikedNFTs() {
+        guard let profileData = viewModel.profileData else {
+            return
+        }
+        
+        let likedNFTsVM = LikedNFTsViewModel(
+            profileService: viewModel.profileService,
+            profileData: profileData,
+            onClose: myNFTSClosed
+        )
+        let likedNFTsVC = LikedNFTsViewController(viewModel: likedNFTsVM)
+        
+        likedNFTsVC.hidesBottomBarWhenPushed = true
+        self.navigationController?.pushViewController(likedNFTsVC, animated: true)
     }
     
     func myNFTSClosed(likes: [String]) {

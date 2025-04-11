@@ -235,6 +235,17 @@
         }
       }
     },
+    "Profile.emptyLikedNFT" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "У Вас ещё нет избранных NFT"
+          }
+        }
+      }
+    },
     "Profile.emptyNFT" : {
       "extractionState" : "manual",
       "localizations" : {
