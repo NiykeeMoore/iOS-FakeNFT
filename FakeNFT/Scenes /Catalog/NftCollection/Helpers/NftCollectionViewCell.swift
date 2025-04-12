@@ -111,36 +111,18 @@ final class NftCollectionViewCell: UICollectionViewCell {
         
         isLikeRequestInProgress = true
         likeButtonActivityIndicator.startAnimating()
-        likeButton.isEnabled = false // Отключаем кнопку во время запроса
+        likeButton.isEnabled = false
         
         let desiredLikeState = !self.isItemLiked
-        
         self.isItemLiked = desiredLikeState
         setLikeButtonState(isLiked: desiredLikeState)
         print("Optimistically set isItemLiked to \(desiredLikeState) for item \(itemId)")
         
-        let likesService = LikesService(networkClient: DefaultNetworkClient())
-        likesService.getLikes { [weak self] likes in
-            guard let self = self else {
-                self?.isLikeRequestInProgress = false
-                self?.likeButtonActivityIndicator.stopAnimating()
-                self?.likeButton.isEnabled = true
-                return
-            }
-            
-            let currentLikes = likes ?? []
-            print("Using likes: \(currentLikes) for item \(self.itemId)")
-            
-            if desiredLikeState {
-                self.addItemToLikes(likesService, currentLikes)
-            } else {
-                self.removeItemFromLikes(likesService, currentLikes)
-            }
-        }
+        onLikeButtonTapped?(itemId)
     }
     
     @objc func cartButtonTapped() {
-        // Реализация добавления/удаления из корзины (пока пустая)
+        onCartButtonTapped?(itemId)
     }
     
     private func setupLayout() {
@@ -188,85 +170,20 @@ final class NftCollectionViewCell: UICollectionViewCell {
         let priceString = String(format: "%.2f", model.price)
         priceLabel.text = priceString + " ETH"
         itemId = model.id
-        if !isLikeRequestInProgress {
-            isItemLiked = model.isLiked
-            setLikeButtonState(isLiked: model.isLiked)
-            print("Configured cell with isLiked = \(model.isLiked) for item \(itemId)")
-        }
+        isItemLiked = model.isLiked
+        setLikeButtonState(isLiked: model.isLiked)
+        print("Configured cell with isLiked = \(model.isLiked) for item \(itemId)")
         setCartButtonState(isAdded: model.isAddedToCart)
         setRating(rating: model.rating)
     }
     
-    private func addItemToLikes(_ likesService: LikesService, _ likes: [String]) {
-        var updatedLikes = likes
-        if !updatedLikes.contains(self.itemId) {
-            updatedLikes.append(self.itemId)
-        }
-        
-        likesService.setLike(nftsIds: updatedLikes) { [weak self] result in
-            guard let self = self else {
-                self?.isLikeRequestInProgress = false
-                self?.likeButtonActivityIndicator.stopAnimating()
-                self?.likeButton.isEnabled = true
-                return
-            }
-            
-            DispatchQueue.main.async {
-                switch result {
-                case .success(let profile):
-                    let isLikedOnServer = profile.likes.contains(self.itemId)
-                    self.isItemLiked = isLikedOnServer
-                    self.setLikeButtonState(isLiked: isLikedOnServer)
-                    self.onLikeButtonTapped?(self.itemId)
-                    print("Successfully added like for item \(self.itemId), isLiked = \(isLikedOnServer)")
-                case .failure(let error):
-                    print("Failed to add like for item \(self.itemId): \(error)")
-                    self.isItemLiked = false
-                    self.setLikeButtonState(isLiked: false)
-                    self.showErrorAlert(message: "Failed to add like: \(error.localizedDescription)")
-                }
-                self.isLikeRequestInProgress = false
-                self.likeButtonActivityIndicator.stopAnimating()
-                self.likeButton.isEnabled = true
-                print("Completed addItemToLikes for item \(self.itemId)")
-            }
-        }
-    }
-    
-    private func removeItemFromLikes(_ likesService: LikesService, _ likes: [String]) {
-        var updatedLikes = likes
-        if let index = updatedLikes.firstIndex(of: self.itemId) {
-            updatedLikes.remove(at: index)
-        }
-        
-        likesService.setLike(nftsIds: updatedLikes) { [weak self] result in
-            guard let self = self else {
-                self?.isLikeRequestInProgress = false
-                self?.likeButtonActivityIndicator.stopAnimating()
-                self?.likeButton.isEnabled = true
-                return
-            }
-            
-            DispatchQueue.main.async {
-                switch result {
-                case .success(let profile):
-                    let isLikedOnServer = profile.likes.contains(self.itemId)
-                    self.isItemLiked = isLikedOnServer
-                    self.setLikeButtonState(isLiked: isLikedOnServer)
-                    self.onLikeButtonTapped?(self.itemId)
-                    print("Successfully removed like for item \(self.itemId), isLiked = \(isLikedOnServer)")
-                case .failure(let error):
-                    print("Failed to remove like for item \(self.itemId): \(error)")
-                    self.isItemLiked = true
-                    self.setLikeButtonState(isLiked: true)
-                    self.showErrorAlert(message: "Failed to remove like: \(error.localizedDescription)")
-                }
-                self.isLikeRequestInProgress = false
-                self.likeButtonActivityIndicator.stopAnimating()
-                self.likeButton.isEnabled = true
-                print("Completed removeItemFromLikes for item \(self.itemId)")
-            }
-        }
+    func completeLikeRequest(isLiked: Bool) {
+        isLikeRequestInProgress = false
+        likeButtonActivityIndicator.stopAnimating()
+        likeButton.isEnabled = true
+        self.isItemLiked = isLiked
+        setLikeButtonState(isLiked: isLiked)
+        print("Completed like request, set isLiked to \(isLiked) for item \(itemId)")
     }
     
     private func setLikeButtonState(isLiked: Bool) {
@@ -274,7 +191,7 @@ final class NftCollectionViewCell: UICollectionViewCell {
         print("Set like button state to \(isLiked) for item \(itemId)")
     }
     
-    private func setCartButtonState(isAdded: Bool) {
+    func setCartButtonState(isAdded: Bool) {
         let image = isAdded ? UIImage(named: "cartDelete") : UIImage(named: "cartAdd")
         cartButton.setImage(image, for: .normal)
     }
@@ -288,15 +205,6 @@ final class NftCollectionViewCell: UICollectionViewCell {
             starImageView.tintColor = index < rating
             ? UIColor(named: "appYellow")
             : UIColor(named: "appLightGrayDynamic")
-        }
-    }
-    
-    private func showErrorAlert(message: String) {
-        let alert = UIAlertController(title: "Error", message: message, preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "OK", style: .default))
-        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-           let rootVC = windowScene.windows.first?.rootViewController {
-            rootVC.present(alert, animated: true)
         }
     }
 }

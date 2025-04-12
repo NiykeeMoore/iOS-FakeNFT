@@ -12,6 +12,8 @@ protocol NftCollectionViewModelProtocol {
     var collectionInfo: NftCollectionModel { get }
     var authorURLString: String { get }
     
+    var onLikesUpdated: ((String?) -> Void)? { get set }
+    
     func loadNFTs(completion: @escaping () -> Void)
     func loadCollectionInfo(completion: @escaping () -> Void)
     func returnCollectionCell(for index: Int) -> NftCollectionCellModel
@@ -29,39 +31,61 @@ final class NftCollectionViewModel: NftCollectionViewModelProtocol {
     
     private let nftCollectionModel: NftCollectionModel
     private let nftService: NftService
+    private let likesService: LikesService
     var loadedNFTs: [Nft] = []
     var collectionInfo: NftCollectionModel { nftCollectionModel }
+    var onLikesUpdated: ((String?) -> Void)?
     
     private var idLikes: Set<String> = []
     private var idAddedToCart: Set<String> = []
     
-    init(nftCollectionModel: NftCollectionModel, nftService: NftService) {
+    init(nftCollectionModel: NftCollectionModel, nftService: NftService, likesService: LikesService) {
         self.nftCollectionModel = nftCollectionModel
         self.nftService = nftService
+        self.likesService = likesService
     }
     
     func loadNFTs(completion: @escaping () -> Void) {
-        loadedNFTs.removeAll()
-        let group = DispatchGroup()
-        
-        for id in nftCollectionModel.nfts {
-            group.enter()
-            nftService.loadNft(id: id) { [weak self] result in
-                guard let self = self else {
-                    return
-                }
-                switch result {
-                case .success(let nft):
-                    self.loadedNFTs.append(nft)
-                case .failure(let error):
-                    print("Error loading NFT \(id): \(error.localizedDescription)")
-                }
-                group.leave()
+        likesService.getLikes { [weak self] likes in
+            guard let self = self else {
+                completion()
+                return
             }
-        }
-        
-        group.notify(queue: .main) {
-            completion()
+            
+            if let likes = likes {
+                self.idLikes = Set(likes)
+                print("Loaded likes: \(self.idLikes)")
+            } else {
+                print("Failed to load likes")
+            }
+            
+            self.loadedNFTs.removeAll()
+            
+            if let nftServiceImpl = self.nftService as? NftServiceImpl {
+                nftServiceImpl.clearCache()
+            }
+            
+            let group = DispatchGroup()
+            
+            for id in self.nftCollectionModel.nfts {
+                group.enter()
+                self.nftService.loadNft(id: id) { [weak self] result in
+                    guard let self = self else {
+                        return
+                    }
+                    switch result {
+                    case .success(let nft):
+                        self.loadedNFTs.append(nft)
+                    case .failure(let error):
+                        print("Error loading NFT \(id): \(error.localizedDescription)")
+                    }
+                    group.leave()
+                }
+            }
+            
+            group.notify(queue: .main) {
+                completion()
+            }
         }
     }
     
@@ -91,20 +115,42 @@ final class NftCollectionViewModel: NftCollectionViewModelProtocol {
     }
     
     func toggleLike(for nftId: String) {
-            if isLiked(nftId) {
-                idLikes.remove(nftId)
-            } else {
-                idLikes.insert(nftId)
-            }
-            // Здесь можно добавить вызов сервиса для сохранения изменений
+        let wasLiked = isLiked(nftId)
+        if wasLiked {
+            idLikes.remove(nftId)
+        } else {
+            idLikes.insert(nftId)
         }
+        print("Optimistically set isItemLiked to \(!wasLiked) for item \(nftId)")
+        
+        let updatedLikes = Array(idLikes)
+        likesService.setLike(nftsIds: updatedLikes) { [weak self] result in
+            guard let self = self else { return }
+            
+            switch result {
+            case .success(let profile):
+                self.idLikes = Set(profile.likes)
+                print("Successfully synced likes: \(profile.likes)")
+                print("Calling onLikesUpdated for nftId: \(nftId)")
+                self.onLikesUpdated?(nftId)
+            case .failure(let error):
+                if wasLiked {
+                    self.idLikes.insert(nftId)
+                } else {
+                    self.idLikes.remove(nftId)
+                }
+                print("Failed to sync likes: \(error)")
+                print("Calling onLikesUpdated for nftId: \(nftId) after failure")
+                self.onLikesUpdated?(nftId)
+            }
+        }
+    }
     
     func toggleCart(for nftId: String) {
-            if isAddedToCart(nftId) {
-                idAddedToCart.remove(nftId)
-            } else {
-                idAddedToCart.insert(nftId)
-            }
-            // Здесь можно добавить вызов сервиса для сохранения изменений
+        if isAddedToCart(nftId) {
+            idAddedToCart.remove(nftId)
+        } else {
+            idAddedToCart.insert(nftId)
         }
+    }
 }

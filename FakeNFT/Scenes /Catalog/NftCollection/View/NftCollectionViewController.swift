@@ -13,9 +13,9 @@ final class NftCollectionViewController: UIViewController, LoadingView {
     
     var activityIndicator: UIActivityIndicatorView
     
-    private let viewModel: NftCollectionViewModelProtocol
+    private var viewModel: NftCollectionViewModelProtocol
     private var headerIsReady = false
-    private var headerHeight: CGFloat = 350 // Временная высота до загрузки
+    private var headerHeight: CGFloat = 350
     
     private lazy var customNavigationBar: CustomNavigationBar = {
         let navBar = CustomNavigationBar()
@@ -48,7 +48,7 @@ final class NftCollectionViewController: UIViewController, LoadingView {
             withReuseIdentifier: NftCollectionViewHeader.reuseIdentifier
         )
         collectionView.backgroundColor = .clear
-        collectionView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0) // Убрали contentInset.top
+        collectionView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
         return collectionView
     }()
     
@@ -68,6 +68,21 @@ final class NftCollectionViewController: UIViewController, LoadingView {
         edgesForExtendedLayout = .top
         collectionView.contentInsetAdjustmentBehavior = .never
         setupView()
+        viewModel.onLikesUpdated = { [weak self] nftId in
+            print("onLikesUpdated called with nftId: \(String(describing: nftId))")
+            if let nftId = nftId,
+               let index = self?.viewModel.loadedNFTs.firstIndex(where: { $0.id == nftId }) {
+                let indexPath = IndexPath(row: index, section: 0)
+                print("Updating cell at indexPath: \(indexPath)")
+                if let cell = self?.collectionView.cellForItem(at: indexPath) as? NftCollectionViewCell {
+                    let isLiked = self?.viewModel.isLiked(nftId) ?? false
+                    cell.completeLikeRequest(isLiked: isLiked)
+                }
+            } else {
+                print("Reloading entire collection view")
+                self?.collectionView.reloadData()
+            }
+        }
         fetchNFTs()
     }
     
@@ -102,6 +117,11 @@ final class NftCollectionViewController: UIViewController, LoadingView {
             }
             self.activityIndicator.stopAnimating()
             self.collectionView.reloadData()
+        }
+        
+        viewModel.loadCollectionInfo { [weak self] in
+            guard let self = self else { return }
+            self.title = self.viewModel.collectionInfo.name
         }
     }
     
@@ -236,12 +256,14 @@ extension NftCollectionViewController: UICollectionViewDataSource {
         
         cell.onLikeButtonTapped = { [weak self] nftId in
             self?.viewModel.toggleLike(for: nftId)
-            collectionView.reloadItems(at: [indexPath])
         }
         
         cell.onCartButtonTapped = { [weak self] nftId in
             self?.viewModel.toggleCart(for: nftId)
-            collectionView.reloadItems(at: [indexPath])
+            if let cell = collectionView.cellForItem(at: indexPath) as? NftCollectionViewCell {
+                let isInCart = self?.viewModel.isAddedToCart(nftId) ?? false
+                cell.setCartButtonState(isAdded: isInCart)
+            }
         }
         
         return cell

@@ -174,9 +174,11 @@ extension CatalogViewController: UITableViewDelegate {
     ) {
         let selectedCollection = viewModel.catalogItems[indexPath.row]
         let nftService = servicesAssembly.nftService
+        let likesService = servicesAssembly.likesService
         let nftViewModel = NftCollectionViewModel(
             nftCollectionModel: selectedCollection,
-            nftService: nftService
+            nftService: nftService,
+            likesService: likesService
         )
         let nftController = NftCollectionViewController(viewModel: nftViewModel)
         

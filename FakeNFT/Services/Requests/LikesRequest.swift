@@ -7,27 +7,56 @@
 
 import Foundation
 
-struct LikesRequest: NetworkRequest {
-    let httpMethod: HttpMethod
-    let dto: (any Dto)?
-    
-    var endpoint: URL? {
-        URL(string: "\(RequestConstants.baseURL)/api/v1/profile/1")
-    }
-    
-    init(httpMethod: HttpMethod, nftsIds: [String]? = nil) {
-        self.httpMethod = httpMethod
-        self.dto = (nftsIds != nil && !nftsIds!.isEmpty)
-        ? LikesRequestDto(nftsIds: nftsIds!)
-        : nil
-    }
-}
-
-struct LikesRequestDto: Dto {
+struct LikesDto: Dto {
     let nftsIds: [String]
     
     func asDictionary() -> [String: String] {
-        let nftsString = nftsIds.joined(separator: ",")
-        return ["nfts": nftsString]
+        return [:]
+    }
+}
+
+struct LikesRequest: NetworkRequest {
+    private let method: HttpMethod
+    let nftsIds: [String]?
+    
+    init(httpMethod: HttpMethod, nftsIds: [String]? = nil) {
+        self.method = httpMethod
+        self.nftsIds = nftsIds
+    }
+    
+    var endpoint: URL? {
+        guard let baseURL = URL(string: "\(RequestConstants.baseURL)/api/v1/profile/1") else {
+            return nil
+        }
+        
+        if method == .get {
+            return baseURL
+        }
+        
+        guard let nftsIds = nftsIds else {
+            return baseURL
+        }
+        
+        var components = URLComponents(url: baseURL, resolvingAgainstBaseURL: false)
+        if !nftsIds.isEmpty {
+            components?.queryItems = nftsIds.map { URLQueryItem(name: "likes", value: $0) }
+        }
+        return components?.url
+    }
+    
+    var httpMethod: HttpMethod {
+        return method
+    }
+    
+    var headers: [String: String]? {
+        if method == .put {
+            return ["Content-Type": "application/x-www-form-urlencoded"]
+        }
+        return nil
+    }
+    
+    var dto: Dto? {
+        guard let nftsIds = nftsIds else { return nil }
+        return LikesDto(nftsIds: nftsIds)
     }
 }
