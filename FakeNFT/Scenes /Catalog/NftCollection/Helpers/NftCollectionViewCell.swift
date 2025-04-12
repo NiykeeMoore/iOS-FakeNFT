@@ -31,6 +31,7 @@ final class NftCollectionViewCell: UICollectionViewCell {
         imageView.contentMode = .scaleAspectFit
         imageView.layer.cornerRadius = 12
         imageView.layer.masksToBounds = true
+        
         return imageView
     }()
     
@@ -46,6 +47,7 @@ final class NftCollectionViewCell: UICollectionViewCell {
             action: #selector(likeButtonTapped),
             for: .touchUpInside
         )
+        
         return button
     }()
     
@@ -53,6 +55,7 @@ final class NftCollectionViewCell: UICollectionViewCell {
         let indicator = UIActivityIndicatorView(style: .medium)
         indicator.color = .gray
         indicator.hidesWhenStopped = true
+        
         return indicator
     }()
     
@@ -69,6 +72,7 @@ final class NftCollectionViewCell: UICollectionViewCell {
         }
         
         stars.forEach { stackView.addArrangedSubview($0)}
+        
         return stackView
     }()
     
@@ -78,12 +82,15 @@ final class NftCollectionViewCell: UICollectionViewCell {
         label.setContentCompressionResistancePriority(.required, for: .vertical)
         label.numberOfLines = 2
         label.adjustsFontSizeToFitWidth = true
+        
         return label
     }()
     
     private lazy var priceLabel: UILabel = {
         let label = UILabel()
         label.font = UIFont.systemFont(ofSize: 10, weight: .medium)
+        label.numberOfLines = 0
+        
         return label
     }()
     
@@ -162,6 +169,16 @@ final class NftCollectionViewCell: UICollectionViewCell {
             cartButton.centerYAnchor.constraint(equalTo: priceLabel.centerYAnchor),
             cartButton.widthAnchor.constraint(equalToConstant: 40)
         ])
+    }
+    
+    func calculateFittingHeight(for width: CGFloat) -> CGFloat {
+        let targetSize = CGSize(width: width, height: UIView.layoutFittingCompressedSize.height)
+        let fittingSize = contentView.systemLayoutSizeFitting(
+            targetSize,
+            withHorizontalFittingPriority: .required,
+            verticalFittingPriority: .fittingSizeLevel
+        )
+        return fittingSize.height
     }
     
     func configure(with model: NftCollectionCellModel) {

@@ -93,14 +93,14 @@ final class NftCollectionViewHeader: UICollectionReusableView {
                 with: url,
                 placeholder: nil
             ) { [weak self] result in
-                    guard let self = self else {
-                        return
-                    }
-                    self.setNeedsLayout()
-                    self.layoutIfNeeded()
-                    
-                    completion()
+                guard let self = self else {
+                    return
                 }
+                self.setNeedsLayout()
+                self.layoutIfNeeded()
+                
+                completion()
+            }
             
         } else {
             completion()
