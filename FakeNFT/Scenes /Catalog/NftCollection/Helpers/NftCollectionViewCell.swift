@@ -22,6 +22,7 @@ final class NftCollectionViewCell: UICollectionViewCell {
     private var isItemInCart: Bool = false
     private var isItemLiked: Bool = false
     private var isLikeRequestInProgress: Bool = false
+    private var isCartRequestInProgress: Bool = false
     private var itemId: String = ""
     var onLikeButtonTapped: ((String) -> Void)?
     var onCartButtonTapped: ((String) -> Void)?
@@ -101,6 +102,13 @@ final class NftCollectionViewCell: UICollectionViewCell {
         return button
     }()
     
+    private lazy var cartButtonActivityIndicator: UIActivityIndicatorView = {
+        let indicator = UIActivityIndicatorView(style: .medium)
+        indicator.color = .gray
+        indicator.hidesWhenStopped = true
+        return indicator
+    }()
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupLayout()
@@ -129,11 +137,25 @@ final class NftCollectionViewCell: UICollectionViewCell {
     }
     
     @objc func cartButtonTapped() {
+        guard !isCartRequestInProgress else {
+            print("Cart request is already in progress, ignoring tap")
+            return
+        }
+        
+        isCartRequestInProgress = true
+        cartButtonActivityIndicator.startAnimating()
+        cartButton.isEnabled = false
+        
+        let desiredCartState = !self.isItemInCart
+        self.isItemInCart = desiredCartState
+        setCartButtonState(isAdded: desiredCartState)
+        print("Optimistically set isItemInCart to \(desiredCartState) for item \(itemId)")
+        
         onCartButtonTapped?(itemId)
     }
     
     private func setupLayout() {
-        [nftImageView, likeButton, likeButtonActivityIndicator, ratingStackView, nameLabel, priceLabel, cartButton].forEach {
+        [nftImageView, likeButton, likeButtonActivityIndicator, ratingStackView, nameLabel, priceLabel, cartButton, cartButtonActivityIndicator].forEach {
             contentView.addSubview($0)
             $0.translatesAutoresizingMaskIntoConstraints = false
         }
@@ -167,7 +189,10 @@ final class NftCollectionViewCell: UICollectionViewCell {
             
             cartButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
             cartButton.centerYAnchor.constraint(equalTo: priceLabel.centerYAnchor),
-            cartButton.widthAnchor.constraint(equalToConstant: 40)
+            cartButton.widthAnchor.constraint(equalToConstant: 40),
+            
+            cartButtonActivityIndicator.centerXAnchor.constraint(equalTo: cartButton.centerXAnchor),
+            cartButtonActivityIndicator.centerYAnchor.constraint(equalTo: cartButton.centerYAnchor)
         ])
     }
     
@@ -203,6 +228,15 @@ final class NftCollectionViewCell: UICollectionViewCell {
         print("Completed like request, set isLiked to \(isLiked) for item \(itemId)")
     }
     
+    func completeCartRequest(isInCart: Bool) {
+        isCartRequestInProgress = false
+        cartButtonActivityIndicator.stopAnimating()
+        cartButton.isEnabled = true
+        self.isItemInCart = isInCart
+        setCartButtonState(isAdded: isInCart)
+        print("Completed cart request, set isInCart to \(isInCart) for item \(itemId)")
+    }
+    
     private func setLikeButtonState(isLiked: Bool) {
         likeButton.tintColor = isLiked ? UIColor(named: "appRed") : UIColor(named: "appWhite")
         print("Set like button state to \(isLiked) for item \(itemId)")
@@ -211,6 +245,7 @@ final class NftCollectionViewCell: UICollectionViewCell {
     func setCartButtonState(isAdded: Bool) {
         let image = isAdded ? UIImage(named: "cartDelete") : UIImage(named: "cartAdd")
         cartButton.setImage(image, for: .normal)
+        print("Set cart button state to \(isAdded) for item \(itemId)")
     }
     
     private func setRating(rating: Int) {

@@ -8,12 +8,11 @@
 import Foundation
 
 protocol NftCollectionViewModelProtocol {
+    var authorURLString: String { get }
     var loadedNFTs: [Nft] { get }
     var collectionInfo: NftCollectionModel { get }
-    var authorURLString: String { get }
-    
     var onLikesUpdated: ((String?) -> Void)? { get set }
-    
+    var onCartUpdated: ((String?) -> Void)? { get set }
     func loadNFTs(completion: @escaping () -> Void)
     func loadCollectionInfo(completion: @escaping () -> Void)
     func returnCollectionCell(for index: Int) -> NftCollectionCellModel
@@ -25,27 +24,34 @@ protocol NftCollectionViewModelProtocol {
 
 final class NftCollectionViewModel: NftCollectionViewModelProtocol {
     
-    typealias Completion = (Result<Nft, Error>) -> Void
-    
     var authorURLString: String = "https://practicum.yandex.ru/ios-developer/"
     
     private let nftCollectionModel: NftCollectionModel
     private let nftService: NftService
     private let likesService: LikesService
+    private let orderService: OrderService
     var loadedNFTs: [Nft] = []
     var collectionInfo: NftCollectionModel { nftCollectionModel }
     var onLikesUpdated: ((String?) -> Void)?
+    var onCartUpdated: ((String?) -> Void)?
     
     private var idLikes: Set<String> = []
     private var idAddedToCart: Set<String> = []
     
-    init(nftCollectionModel: NftCollectionModel, nftService: NftService, likesService: LikesService) {
+    init(
+        nftCollectionModel: NftCollectionModel,
+        nftService: NftService,
+        likesService: LikesService,
+        orderService: OrderService
+    ) {
         self.nftCollectionModel = nftCollectionModel
         self.nftService = nftService
         self.likesService = likesService
+        self.orderService = orderService
     }
     
     func loadNFTs(completion: @escaping () -> Void) {
+
         likesService.getLikes { [weak self] likes in
             guard let self = self else {
                 completion()
@@ -59,32 +65,46 @@ final class NftCollectionViewModel: NftCollectionViewModelProtocol {
                 print("Failed to load likes")
             }
             
-            self.loadedNFTs.removeAll()
-            
-            if let nftServiceImpl = self.nftService as? NftServiceImpl {
-                nftServiceImpl.clearCache()
-            }
-            
-            let group = DispatchGroup()
-            
-            for id in self.nftCollectionModel.nfts {
-                group.enter()
-                self.nftService.loadNft(id: id) { [weak self] result in
-                    guard let self = self else {
-                        return
-                    }
-                    switch result {
-                    case .success(let nft):
-                        self.loadedNFTs.append(nft)
-                    case .failure(let error):
-                        print("Error loading NFT \(id): \(error.localizedDescription)")
-                    }
-                    group.leave()
+            self.orderService.getOrder { [weak self] order in
+                guard let self = self else {
+                    completion()
+                    return
                 }
-            }
-            
-            group.notify(queue: .main) {
-                completion()
+                
+                if let order = order {
+                    self.idAddedToCart = Set(order)
+                    print("Loaded order: \(self.idAddedToCart)")
+                } else {
+                    print("Failed to load order")
+                }
+                
+                self.loadedNFTs.removeAll()
+                
+                if let nftServiceImpl = self.nftService as? NftServiceImpl {
+                    nftServiceImpl.clearCache()
+                }
+                
+                let group = DispatchGroup()
+                
+                for id in self.nftCollectionModel.nfts {
+                    group.enter()
+                    self.nftService.loadNft(id: id) { [weak self] result in
+                        guard let self = self else {
+                            return
+                        }
+                        switch result {
+                        case .success(let nft):
+                            self.loadedNFTs.append(nft)
+                        case .failure(let error):
+                            print("Error loading NFT \(id): \(error.localizedDescription)")
+                        }
+                        group.leave()
+                    }
+                }
+                
+                group.notify(queue: .main) {
+                    completion()
+                }
             }
         }
     }
@@ -147,10 +167,34 @@ final class NftCollectionViewModel: NftCollectionViewModelProtocol {
     }
     
     func toggleCart(for nftId: String) {
-        if isAddedToCart(nftId) {
+        let wasInCart = isAddedToCart(nftId)
+        if wasInCart {
             idAddedToCart.remove(nftId)
         } else {
             idAddedToCart.insert(nftId)
+        }
+        print("Optimistically set isItemInCart to \(!wasInCart) for item \(nftId)")
+        
+        let updatedOrder = Array(idAddedToCart)
+        orderService.setOrder(nftsIds: updatedOrder) { [weak self] result in
+            guard let self = self else { return }
+            
+            switch result {
+            case .success(let order):
+                self.idAddedToCart = Set(order.nfts)
+                print("Successfully synced order: \(order.nfts)")
+                print("Calling onCartUpdated for nftId: \(nftId)")
+                self.onCartUpdated?(nftId)
+            case .failure(let error):
+                if wasInCart {
+                    self.idAddedToCart.insert(nftId)
+                } else {
+                    self.idAddedToCart.remove(nftId)
+                }
+                print("Failed to sync order: \(error)")
+                print("Calling onCartUpdated for nftId: \(nftId) after failure")
+                self.onCartUpdated?(nftId)
+            }
         }
     }
 }

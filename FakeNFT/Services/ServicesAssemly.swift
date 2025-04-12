@@ -21,4 +21,8 @@ final class ServicesAssembly {
     var likesService: LikesService {
             LikesService(networkClient: networkClient)
         }
+    
+    var orderService: OrderService {
+        OrderService(networkClient: networkClient)
+    }
 }

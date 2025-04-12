@@ -68,6 +68,7 @@ final class NftCollectionViewController: UIViewController, LoadingView {
         edgesForExtendedLayout = .top
         collectionView.contentInsetAdjustmentBehavior = .never
         setupView()
+        
         viewModel.onLikesUpdated = { [weak self] nftId in
             print("onLikesUpdated called with nftId: \(String(describing: nftId))")
             if let nftId = nftId,
@@ -83,6 +84,26 @@ final class NftCollectionViewController: UIViewController, LoadingView {
                 self?.collectionView.reloadData()
             }
         }
+        
+        viewModel.onCartUpdated = { [weak self] nftId in
+            print("onCartUpdated called with nftId: \(String(describing: nftId))")
+            if let nftId = nftId,
+               let index = self?.viewModel.loadedNFTs.firstIndex(where: { $0.id == nftId }) {
+                let indexPath = IndexPath(row: index, section: 0)
+                print("Updating cell at indexPath: \(indexPath)")
+                if let cell = self?.collectionView.cellForItem(at: indexPath) as? NftCollectionViewCell {
+                    let isInCart = self?.viewModel.isAddedToCart(nftId) ?? false
+                    cell.completeCartRequest(isInCart: isInCart)
+                } else {
+                    print("Cell not found for indexPath: \(indexPath), reloading")
+                    self?.collectionView.reloadItems(at: [indexPath])
+                }
+            } else {
+                print("Reloading entire collection view")
+                self?.collectionView.reloadData()
+            }
+        }
+        
         fetchNFTs()
     }
     
@@ -267,10 +288,6 @@ extension NftCollectionViewController: UICollectionViewDataSource {
         
         cell.onCartButtonTapped = { [weak self] nftId in
             self?.viewModel.toggleCart(for: nftId)
-            if let cell = collectionView.cellForItem(at: indexPath) as? NftCollectionViewCell {
-                let isInCart = self?.viewModel.isAddedToCart(nftId) ?? false
-                cell.setCartButtonState(isAdded: isInCart)
-            }
         }
         
         return cell
