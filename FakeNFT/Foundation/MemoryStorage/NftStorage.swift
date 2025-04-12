@@ -27,7 +27,6 @@ final class NftStorageImpl: NftStorage {
     func clear() {
         syncQueue.async { [weak self] in
             self?.storage.removeAll()
-            print("Cleared NFT storage")
         }
     }
 }

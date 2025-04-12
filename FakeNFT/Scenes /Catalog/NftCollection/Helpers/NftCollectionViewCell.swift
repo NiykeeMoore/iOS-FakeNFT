@@ -120,7 +120,6 @@ final class NftCollectionViewCell: UICollectionViewCell {
     
     @objc func likeButtonTapped() {
         guard !isLikeRequestInProgress else {
-            print("Like request is already in progress, ignoring tap")
             return
         }
         
@@ -131,14 +130,12 @@ final class NftCollectionViewCell: UICollectionViewCell {
         let desiredLikeState = !self.isItemLiked
         self.isItemLiked = desiredLikeState
         setLikeButtonState(isLiked: desiredLikeState)
-        print("Optimistically set isItemLiked to \(desiredLikeState) for item \(itemId)")
         
         onLikeButtonTapped?(itemId)
     }
     
     @objc func cartButtonTapped() {
         guard !isCartRequestInProgress else {
-            print("Cart request is already in progress, ignoring tap")
             return
         }
         
@@ -149,13 +146,21 @@ final class NftCollectionViewCell: UICollectionViewCell {
         let desiredCartState = !self.isItemInCart
         self.isItemInCart = desiredCartState
         setCartButtonState(isAdded: desiredCartState)
-        print("Optimistically set isItemInCart to \(desiredCartState) for item \(itemId)")
         
         onCartButtonTapped?(itemId)
     }
     
     private func setupLayout() {
-        [nftImageView, likeButton, likeButtonActivityIndicator, ratingStackView, nameLabel, priceLabel, cartButton, cartButtonActivityIndicator].forEach {
+        [
+            nftImageView,
+            likeButton,
+            likeButtonActivityIndicator,
+            ratingStackView,
+            nameLabel,
+            priceLabel,
+            cartButton,
+            cartButtonActivityIndicator
+        ].forEach {
             contentView.addSubview($0)
             $0.translatesAutoresizingMaskIntoConstraints = false
         }
@@ -214,7 +219,6 @@ final class NftCollectionViewCell: UICollectionViewCell {
         itemId = model.id
         isItemLiked = model.isLiked
         setLikeButtonState(isLiked: model.isLiked)
-        print("Configured cell with isLiked = \(model.isLiked) for item \(itemId)")
         setCartButtonState(isAdded: model.isAddedToCart)
         setRating(rating: model.rating)
     }
@@ -225,7 +229,6 @@ final class NftCollectionViewCell: UICollectionViewCell {
         likeButton.isEnabled = true
         self.isItemLiked = isLiked
         setLikeButtonState(isLiked: isLiked)
-        print("Completed like request, set isLiked to \(isLiked) for item \(itemId)")
     }
     
     func completeCartRequest(isInCart: Bool) {
@@ -234,18 +237,15 @@ final class NftCollectionViewCell: UICollectionViewCell {
         cartButton.isEnabled = true
         self.isItemInCart = isInCart
         setCartButtonState(isAdded: isInCart)
-        print("Completed cart request, set isInCart to \(isInCart) for item \(itemId)")
     }
     
     private func setLikeButtonState(isLiked: Bool) {
         likeButton.tintColor = isLiked ? UIColor(named: "appRed") : UIColor(named: "appWhite")
-        print("Set like button state to \(isLiked) for item \(itemId)")
     }
     
     func setCartButtonState(isAdded: Bool) {
         let image = isAdded ? UIImage(named: "cartDelete") : UIImage(named: "cartAdd")
         cartButton.setImage(image, for: .normal)
-        print("Set cart button state to \(isAdded) for item \(itemId)")
     }
     
     private func setRating(rating: Int) {

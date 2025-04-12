@@ -92,7 +92,7 @@ final class NftCollectionViewHeader: UICollectionReusableView {
             coverImageView.kf.setImage(
                 with: url,
                 placeholder: nil
-            ) { [weak self] result in
+            ) { [weak self] _ in
                 guard let self = self else {
                     return
                 }
@@ -148,7 +148,7 @@ final class NftCollectionViewHeader: UICollectionReusableView {
             equalTo: collectionTitleLabel.bottomAnchor,
             constant: 8
         )
-        titleToAuthorConstraint.priority = .defaultHigh // Приоритет ниже 1000
+        titleToAuthorConstraint.priority = .defaultHigh
         
         // Ограничение отступа между collectionAuthorLabel и collectionDescriptionLabel
         let authorToDescriptionConstraint = collectionDescriptionLabel.topAnchor.constraint(

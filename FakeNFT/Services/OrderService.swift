@@ -17,18 +17,18 @@ final class OrderService {
     
     func getOrder(completion: @escaping ([String]?) -> Void) {
         if let cachedOrder = cachedOrder {
-            print("Returning cached order: \(cachedOrder)")
             completion(cachedOrder)
             return
         }
         
         let request = OrderRequest(httpMethod: .get)
         networkClient.send(request: request, type: Order.self) { [weak self] result in
-            guard let self = self else { return }
+            guard let self = self else {
+                return
+            }
             DispatchQueue.main.async {
                 switch result {
                 case .success(let order):
-                    print("Successfully fetched order: \(order)")
                     self.cachedOrder = order.nfts
                     completion(order.nfts)
                 case .failure(let error):
@@ -41,13 +41,13 @@ final class OrderService {
     
     func setOrder(nftsIds: [String], completion: @escaping (Result<Order, Error>) -> Void) {
         let request = OrderRequest(httpMethod: .put, nftsIds: nftsIds.isEmpty ? [] : nftsIds)
-        print("Sending setOrder request with nftsIds: \(nftsIds)")
         networkClient.send(request: request, type: Order.self) { [weak self] result in
-            guard let self = self else { return }
+            guard let self = self else {
+                return
+            }
             DispatchQueue.main.async {
                 switch result {
                 case .success(let order):
-                    print("Successfully fetched order: \(order)")
                     self.cachedOrder = order.nfts
                     completion(.success(order))
                 case .failure(let error):

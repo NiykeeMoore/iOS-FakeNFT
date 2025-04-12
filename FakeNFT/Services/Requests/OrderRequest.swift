@@ -48,7 +48,9 @@ struct OrderRequest: NetworkRequest {
     }
     
     var dto: Dto? {
-        guard let nftsIds = nftsIds else { return nil }
+        guard let nftsIds = nftsIds else {
+            return nil
+        }
         return OrderDto(nftsIds: nftsIds)
     }
 }

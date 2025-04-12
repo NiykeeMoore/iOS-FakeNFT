@@ -60,7 +60,6 @@ final class NftCollectionViewModel: NftCollectionViewModelProtocol {
             
             if let likes = likes {
                 self.idLikes = Set(likes)
-                print("Loaded likes: \(self.idLikes)")
             } else {
                 print("Failed to load likes")
             }
@@ -73,7 +72,6 @@ final class NftCollectionViewModel: NftCollectionViewModelProtocol {
                 
                 if let order = order {
                     self.idAddedToCart = Set(order)
-                    print("Loaded order: \(self.idAddedToCart)")
                 } else {
                     print("Failed to load order")
                 }
@@ -141,17 +139,16 @@ final class NftCollectionViewModel: NftCollectionViewModelProtocol {
         } else {
             idLikes.insert(nftId)
         }
-        print("Optimistically set isItemLiked to \(!wasLiked) for item \(nftId)")
         
         let updatedLikes = Array(idLikes)
         likesService.setLike(nftsIds: updatedLikes) { [weak self] result in
-            guard let self = self else { return }
+            guard let self = self else {
+                return
+            }
             
             switch result {
             case .success(let profile):
                 self.idLikes = Set(profile.likes)
-                print("Successfully synced likes: \(profile.likes)")
-                print("Calling onLikesUpdated for nftId: \(nftId)")
                 self.onLikesUpdated?(nftId)
             case .failure(let error):
                 if wasLiked {
@@ -159,8 +156,7 @@ final class NftCollectionViewModel: NftCollectionViewModelProtocol {
                 } else {
                     self.idLikes.remove(nftId)
                 }
-                print("Failed to sync likes: \(error)")
-                print("Calling onLikesUpdated for nftId: \(nftId) after failure")
+                print("Failed to sync likes: \(error.localizedDescription)")
                 self.onLikesUpdated?(nftId)
             }
         }
@@ -173,17 +169,16 @@ final class NftCollectionViewModel: NftCollectionViewModelProtocol {
         } else {
             idAddedToCart.insert(nftId)
         }
-        print("Optimistically set isItemInCart to \(!wasInCart) for item \(nftId)")
         
         let updatedOrder = Array(idAddedToCart)
         orderService.setOrder(nftsIds: updatedOrder) { [weak self] result in
-            guard let self = self else { return }
+            guard let self = self else {
+                return
+            }
             
             switch result {
             case .success(let order):
                 self.idAddedToCart = Set(order.nfts)
-                print("Successfully synced order: \(order.nfts)")
-                print("Calling onCartUpdated for nftId: \(nftId)")
                 self.onCartUpdated?(nftId)
             case .failure(let error):
                 if wasInCart {
@@ -191,8 +186,7 @@ final class NftCollectionViewModel: NftCollectionViewModelProtocol {
                 } else {
                     self.idAddedToCart.remove(nftId)
                 }
-                print("Failed to sync order: \(error)")
-                print("Calling onCartUpdated for nftId: \(nftId) after failure")
+                print("Failed to sync orders: \(error.localizedDescription)")
                 self.onCartUpdated?(nftId)
             }
         }

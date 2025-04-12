@@ -70,36 +70,29 @@ final class NftCollectionViewController: UIViewController, LoadingView {
         setupView()
         
         viewModel.onLikesUpdated = { [weak self] nftId in
-            print("onLikesUpdated called with nftId: \(String(describing: nftId))")
             if let nftId = nftId,
                let index = self?.viewModel.loadedNFTs.firstIndex(where: { $0.id == nftId }) {
                 let indexPath = IndexPath(row: index, section: 0)
-                print("Updating cell at indexPath: \(indexPath)")
                 if let cell = self?.collectionView.cellForItem(at: indexPath) as? NftCollectionViewCell {
                     let isLiked = self?.viewModel.isLiked(nftId) ?? false
                     cell.completeLikeRequest(isLiked: isLiked)
                 }
             } else {
-                print("Reloading entire collection view")
                 self?.collectionView.reloadData()
             }
         }
         
         viewModel.onCartUpdated = { [weak self] nftId in
-            print("onCartUpdated called with nftId: \(String(describing: nftId))")
             if let nftId = nftId,
                let index = self?.viewModel.loadedNFTs.firstIndex(where: { $0.id == nftId }) {
                 let indexPath = IndexPath(row: index, section: 0)
-                print("Updating cell at indexPath: \(indexPath)")
                 if let cell = self?.collectionView.cellForItem(at: indexPath) as? NftCollectionViewCell {
                     let isInCart = self?.viewModel.isAddedToCart(nftId) ?? false
                     cell.completeCartRequest(isInCart: isInCart)
                 } else {
-                    print("Cell not found for indexPath: \(indexPath), reloading")
                     self?.collectionView.reloadItems(at: [indexPath])
                 }
             } else {
-                print("Reloading entire collection view")
                 self?.collectionView.reloadData()
             }
         }
@@ -141,7 +134,9 @@ final class NftCollectionViewController: UIViewController, LoadingView {
         }
         
         viewModel.loadCollectionInfo { [weak self] in
-            guard let self = self else { return }
+            guard let self = self else {
+                return
+            }
             self.title = self.viewModel.collectionInfo.name
         }
     }
