@@ -259,7 +259,7 @@ extension ProfileViewController: UITableViewDataSource, UITableViewDelegate {
         case 0:
             showMyNFTs()
         case 1:
-            print("Избранные NFT tapped")
+            showLikedNFTs()
         case 2:
             openWebsite()
         default:
@@ -267,7 +267,7 @@ extension ProfileViewController: UITableViewDataSource, UITableViewDelegate {
         }
     }
     
-    func showMyNFTs() {
+    private func showMyNFTs() {
         guard let profileData = viewModel.profileData else {
             return
         }
@@ -283,13 +283,29 @@ extension ProfileViewController: UITableViewDataSource, UITableViewDelegate {
         self.navigationController?.pushViewController(myNFTsVC, animated: true)
     }
     
-    func myNFTSClosed(likes: [String]) {
+    private func showLikedNFTs() {
+        guard let profileData = viewModel.profileData else {
+            return
+        }
+        
+        let likedNFTsVM = LikedNFTsViewModel(
+            profileService: viewModel.profileService,
+            profileData: profileData,
+            onClose: myNFTSClosed
+        )
+        let likedNFTsVC = LikedNFTsViewController(viewModel: likedNFTsVM)
+        
+        likedNFTsVC.hidesBottomBarWhenPushed = true
+        self.navigationController?.pushViewController(likedNFTsVC, animated: true)
+    }
+    
+    private func myNFTSClosed(likes: [String]) {
         viewModel.updateLikes(likes)
         tableData = viewModel.getTableData()
         tableView.reloadData()
     }
     
-    func openWebsite() {
+    private func openWebsite() {
         guard let url = viewModel.validateWebsiteURL() else {
             showErrorAlert(errorDescription: NSLocalizedString("Webview.invalidURL", comment: ""))
             return

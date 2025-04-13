@@ -51,14 +51,6 @@ final class ProfileViewModel: ProfileViewModelProtocol {
             switch result {
             case .success(let data):
                 self?.profileData = data
-                
-                // For Testing
-                self?.profileData?.nfts = [
-                    "ca34d35a-4507-47d9-9312-5ea7053994c0",
-                    "1fda6f0c-a615-4a1a-aa9c-a1cbd7cc76ae",
-                    "9e472edf-ed51-4901-8cfc-8eb3f617519f"
-                ]
-                
                 self?.onProfileUpdate?(data)
             case .failure(let error):
                 self?.onError?(error)

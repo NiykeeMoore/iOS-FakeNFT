@@ -132,17 +132,12 @@ final class MyNFTsViewController: UIViewController {
         let imageConfig = UIImage.SymbolConfiguration(pointSize: 20, weight: .medium)
         let leftImage = UIImage(systemName: "chevron.left", withConfiguration: imageConfig)?
             .withTintColor(UIColor(named: "appBlackDynamic") ?? .black, renderingMode: .alwaysOriginal)
-        let rightImage = UIImage(systemName: "text.justifyleft", withConfiguration: imageConfig)?
+        let rightImage = isEmptyNFT ? nil : UIImage(systemName: "text.justifyleft", withConfiguration: imageConfig)?
             .withTintColor(UIColor(named: "appBlackDynamic") ?? .black, renderingMode: .alwaysOriginal)
         
-        customNavBar.configure(
-            leftButtonImage: leftImage,
-            title: isEmptyNFT ? nil : NSLocalizedString("Profile.myNFT", comment: ""),
-            rightButtonImage: isEmptyNFT ? nil : rightImage
-        )
-        
-        customNavBar.setLeftButtonTarget(target: self, action: #selector(backButtonTapped))
-        if !isEmptyNFT { customNavBar.setRightButtonTarget(target: self, action: #selector(sortButtonTapped)) }
+        customNavBar.configureLeftButton(image: leftImage, target: self, action: #selector(backButtonTapped))
+        customNavBar.configureTitle(isEmptyNFT ? nil : NSLocalizedString("Profile.likedNFT", comment: ""))
+        customNavBar.configureRightButton(image: rightImage, target: self, action: #selector(sortButtonTapped))
         
         // Layout constraints
         customNavBar.translatesAutoresizingMaskIntoConstraints = false
