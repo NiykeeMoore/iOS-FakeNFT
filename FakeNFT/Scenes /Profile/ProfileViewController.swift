@@ -267,7 +267,7 @@ extension ProfileViewController: UITableViewDataSource, UITableViewDelegate {
         }
     }
     
-    func showMyNFTs() {
+    private func showMyNFTs() {
         guard let profileData = viewModel.profileData else {
             return
         }
@@ -283,7 +283,7 @@ extension ProfileViewController: UITableViewDataSource, UITableViewDelegate {
         self.navigationController?.pushViewController(myNFTsVC, animated: true)
     }
     
-    func showLikedNFTs() {
+    private func showLikedNFTs() {
         guard let profileData = viewModel.profileData else {
             return
         }
@@ -299,13 +299,13 @@ extension ProfileViewController: UITableViewDataSource, UITableViewDelegate {
         self.navigationController?.pushViewController(likedNFTsVC, animated: true)
     }
     
-    func myNFTSClosed(likes: [String]) {
+    private func myNFTSClosed(likes: [String]) {
         viewModel.updateLikes(likes)
         tableData = viewModel.getTableData()
         tableView.reloadData()
     }
     
-    func openWebsite() {
+    private func openWebsite() {
         guard let url = viewModel.validateWebsiteURL() else {
             showErrorAlert(errorDescription: NSLocalizedString("Webview.invalidURL", comment: ""))
             return
