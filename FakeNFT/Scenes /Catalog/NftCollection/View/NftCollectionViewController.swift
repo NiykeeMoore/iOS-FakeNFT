@@ -142,7 +142,7 @@ final class NftCollectionViewController: UIViewController, LoadingView {
     }
     
     private func setupView() {
-        view.backgroundColor = UIColor(named: "appWhite")
+        view.backgroundColor = UIColor(named: "appWhiteDynamic")
         
         [customNavigationBar, collectionView, activityIndicator].forEach {
             view.addSubview($0)

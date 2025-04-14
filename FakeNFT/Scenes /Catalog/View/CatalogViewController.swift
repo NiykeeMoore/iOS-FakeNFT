@@ -29,7 +29,7 @@ final class CatalogViewController: UIViewController, LoadingView {
     
     private lazy var tableView: UITableView = {
         let tableView = UITableView()
-        tableView.backgroundColor = UIColor(named: "appWhite")
+        tableView.backgroundColor = UIColor(named: "appWhiteDynamic")
         tableView.separatorStyle = .none
         tableView.delegate = self
         tableView.dataSource = self
@@ -44,7 +44,7 @@ final class CatalogViewController: UIViewController, LoadingView {
     
     private lazy var refreshControl: UIRefreshControl = {
         let refreshControl = UIRefreshControl()
-        refreshControl.tintColor = UIColor(named: "appBlack")
+        refreshControl.tintColor = UIColor(named: "appBlackDynamic")
         refreshControl.addTarget(self, action: #selector(refreshCatalog), for: .valueChanged)
         return refreshControl
     }()
@@ -212,7 +212,7 @@ extension CatalogViewController: UITableViewDataSource {
         let catalogItem = viewModel.catalogItems[indexPath.row]
         cell.configure(with: catalogItem)
         cell.selectionStyle = .none
-        cell.backgroundColor = UIColor(named: "appWhite")
+        cell.backgroundColor = UIColor(named: "appWhiteDynamic")
         
         return cell
     }

@@ -24,7 +24,7 @@ final class NftCollectionViewHeader: UICollectionReusableView {
     private lazy var collectionTitleLabel: UILabel = {
         let tittleLabel = UILabel()
         tittleLabel.font = UIFont.systemFont(ofSize: 22, weight: .bold)
-        tittleLabel.textColor = UIColor(named: "appBlack")
+        tittleLabel.textColor = UIColor(named: "appBlackDynamic")
         tittleLabel.numberOfLines = 0
         return tittleLabel
     }()
@@ -32,7 +32,7 @@ final class NftCollectionViewHeader: UICollectionReusableView {
     private lazy var collectionAuthorLabel: UILabel = {
         let author = UILabel()
         author.font = UIFont.systemFont(ofSize: 13, weight: .regular)
-        author.textColor = UIColor(named: "appBlack")
+        author.textColor = UIColor(named: "appBlackDynamic")
         author.numberOfLines = 0
         author.text = NSLocalizedString("Collection's author", comment: "")
         return author
@@ -52,7 +52,7 @@ final class NftCollectionViewHeader: UICollectionReusableView {
     private lazy var collectionDescriptionLabel: UILabel = {
         let label = UILabel()
         label.font = UIFont.systemFont(ofSize: 13, weight: .regular)
-        label.textColor = UIColor(named: "appBlack")
+        label.textColor = UIColor(named: "appBlackDynamic")
         label.numberOfLines = 0
         label.lineBreakMode = .byWordWrapping
         return label
