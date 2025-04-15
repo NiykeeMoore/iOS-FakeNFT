@@ -24,7 +24,7 @@ final class CatalogCell: UITableViewCell {
     
     private let previewText: UILabel = {
         let label = UILabel()
-        label.textColor = UIColor(named: "appBlackDynamic")
+        label.textColor = UIColor(resource: .appBlackDynamic)
         label.font = .systemFont(ofSize: 17, weight: .bold)
         label.text = "Empty collection (0)"
         

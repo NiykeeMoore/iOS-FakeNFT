@@ -24,7 +24,7 @@ final class NftCollectionViewHeader: UICollectionReusableView {
     private lazy var collectionTitleLabel: UILabel = {
         let tittleLabel = UILabel()
         tittleLabel.font = UIFont.systemFont(ofSize: 22, weight: .bold)
-        tittleLabel.textColor = UIColor(named: "appBlackDynamic")
+        tittleLabel.textColor = UIColor(resource: .appBlackDynamic)
         tittleLabel.numberOfLines = 0
         return tittleLabel
     }()
@@ -32,7 +32,7 @@ final class NftCollectionViewHeader: UICollectionReusableView {
     private lazy var collectionAuthorLabel: UILabel = {
         let author = UILabel()
         author.font = UIFont.systemFont(ofSize: 13, weight: .regular)
-        author.textColor = UIColor(named: "appBlackDynamic")
+        author.textColor = UIColor(resource: .appBlackDynamic)
         author.numberOfLines = 0
         author.text = NSLocalizedString("Collection's author", comment: "")
         return author
@@ -41,7 +41,7 @@ final class NftCollectionViewHeader: UICollectionReusableView {
     private lazy var collectionAuthorLinkLabel: UILabel = {
         let label = UILabel()
         label.font = UIFont.systemFont(ofSize: 15, weight: .regular)
-        label.textColor = UIColor(named: "appBlue")
+        label.textColor = UIColor(resource: .appBlue)
         label.isUserInteractionEnabled = true
         label.numberOfLines = 0
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleAuthorLinkTap))
@@ -52,7 +52,7 @@ final class NftCollectionViewHeader: UICollectionReusableView {
     private lazy var collectionDescriptionLabel: UILabel = {
         let label = UILabel()
         label.font = UIFont.systemFont(ofSize: 13, weight: .regular)
-        label.textColor = UIColor(named: "appBlackDynamic")
+        label.textColor = UIColor(resource: .appBlackDynamic)
         label.numberOfLines = 0
         label.lineBreakMode = .byWordWrapping
         return label
@@ -157,11 +157,10 @@ final class NftCollectionViewHeader: UICollectionReusableView {
         )
         authorToDescriptionConstraint.priority = .defaultHigh
         
-        NSLayoutConstraint.activate([
+        var constraints: [NSLayoutConstraint] = [
             coverImageView.topAnchor.constraint(equalTo: topAnchor),
             coverImageView.leadingAnchor.constraint(equalTo: leadingAnchor),
             coverImageView.trailingAnchor.constraint(equalTo: trailingAnchor),
-            coverHeightConstraint!,
             
             collectionTitleLabel.topAnchor.constraint(equalTo: coverImageView.bottomAnchor, constant: 16),
             collectionTitleLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
@@ -179,7 +178,13 @@ final class NftCollectionViewHeader: UICollectionReusableView {
             collectionDescriptionLabel.leadingAnchor.constraint(equalTo: collectionTitleLabel.leadingAnchor),
             collectionDescriptionLabel.trailingAnchor.constraint(equalTo: collectionTitleLabel.trailingAnchor),
             collectionDescriptionLabel.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -8)
-        ])
+        ]
+        
+        if let coverHeightConstraint = coverHeightConstraint {
+            constraints.append(coverHeightConstraint)
+        }
+        
+        NSLayoutConstraint.activate(constraints)
     }
     
     func calculatedHeight(for width: CGFloat) -> CGFloat {

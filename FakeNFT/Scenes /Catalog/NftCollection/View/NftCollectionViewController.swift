@@ -119,7 +119,7 @@ final class NftCollectionViewController: UIViewController, LoadingView {
             url: url,
             configuration: config
         )
-        safariVC.preferredControlTintColor = UIColor(named: "appBlackDynamic")
+        safariVC.preferredControlTintColor = UIColor(resource: .appWhiteDynamic)
         present(safariVC, animated: true)
     }
     
@@ -142,7 +142,7 @@ final class NftCollectionViewController: UIViewController, LoadingView {
     }
     
     private func setupView() {
-        view.backgroundColor = UIColor(named: "appWhiteDynamic")
+        view.backgroundColor = UIColor(resource: .appWhiteDynamic)
         
         [customNavigationBar, collectionView, activityIndicator].forEach {
             view.addSubview($0)
@@ -197,16 +197,31 @@ extension NftCollectionViewController: UICollectionViewDelegateFlowLayout {
         layout collectionViewLayout: UICollectionViewLayout,
         sizeForItemAt indexPath: IndexPath
     ) -> CGSize {
-        let interItemSpacing: CGFloat = 10
-        let width = (collectionView.bounds.width - 32 - 2 * interItemSpacing) / 3
+        let totalWidth = collectionView.bounds.width
+        let itemsPerRow: CGFloat = 3
+        let spacing: CGFloat = Constants.interItemSpacing
+        let insets: CGFloat = Constants.sectionInset * 2
         
-        let dummyCell = NftCollectionViewCell(frame: CGRect(x: 0, y: 0, width: width, height: 1000))
-        let model = viewModel.returnCollectionCell(for: indexPath.row)
-        dummyCell.configure(with: model)
+        let availableWidth = totalWidth - insets - (spacing * (itemsPerRow - 1))
+        let itemWidth = floor(availableWidth / itemsPerRow)
         
-        let height = dummyCell.calculateFittingHeight(for: width)
+        guard itemWidth > 0 else {
+            return CGSize(width: 0, height: 0)
+        }
         
-        return CGSize(width: width, height: height)
+        let rowStartIndex = (indexPath.row / Int(itemsPerRow)) * Int(itemsPerRow)
+        let rowEndIndex = min(rowStartIndex + Int(itemsPerRow), viewModel.loadedNFTs.count)
+        
+        var maxHeight: CGFloat = 0
+        for rowIndex in rowStartIndex..<rowEndIndex {
+            let dummyCell = NftCollectionViewCell(frame: CGRect(x: 0, y: 0, width: itemWidth, height: 1000))
+            let model = viewModel.returnCollectionCell(for: rowIndex)
+            dummyCell.configure(with: model)
+            let height = dummyCell.calculateFittingHeight(for: itemWidth)
+            maxHeight = max(maxHeight, height)
+        }
+        
+        return CGSize(width: itemWidth, height: maxHeight)
     }
     
     func collectionView(
@@ -214,7 +229,15 @@ extension NftCollectionViewController: UICollectionViewDelegateFlowLayout {
         layout collectionViewLayout: UICollectionViewLayout,
         minimumLineSpacingForSectionAt section: Int
     ) -> CGFloat {
-        return 8
+        return Constants.interItemSpacing
+    }
+    
+    func collectionView(
+        _ collectionView: UICollectionView,
+        layout collectionViewLayout: UICollectionViewLayout,
+        minimumInteritemSpacingForSectionAt section: Int
+    ) -> CGFloat {
+        return Constants.interItemSpacing
     }
     
     func collectionView(
@@ -222,7 +245,12 @@ extension NftCollectionViewController: UICollectionViewDelegateFlowLayout {
         layout collectionViewLayout: UICollectionViewLayout,
         insetForSectionAt section: Int
     ) -> UIEdgeInsets {
-        return UIEdgeInsets(top: 16, left: 16, bottom: 16, right: 16)
+        return UIEdgeInsets(
+            top: Constants.interItemSpacing,
+            left: Constants.sectionInset,
+            bottom: Constants.interItemSpacing,
+            right: Constants.sectionInset
+        )
     }
     
     func collectionView(
@@ -231,11 +259,8 @@ extension NftCollectionViewController: UICollectionViewDelegateFlowLayout {
         referenceSizeForHeaderInSection section: Int
     ) -> CGSize {
         let width = collectionView.bounds.width
-        guard width > 0 else {
-            return CGSize(width: width, height: headerHeight)
-        }
         
-        if !headerIsReady {
+        if width <= 0 || !headerIsReady {
             return CGSize(width: width, height: headerHeight)
         }
         
@@ -313,5 +338,12 @@ extension NftCollectionViewController: UICollectionViewDataSource {
         )
         
         return header
+    }
+}
+
+private extension NftCollectionViewController {
+    enum Constants {
+        static let interItemSpacing: CGFloat = 10
+        static let sectionInset: CGFloat = 16
     }
 }

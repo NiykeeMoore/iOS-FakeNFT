@@ -29,7 +29,7 @@ final class CatalogViewController: UIViewController, LoadingView {
     
     private lazy var tableView: UITableView = {
         let tableView = UITableView()
-        tableView.backgroundColor = UIColor(named: "appWhiteDynamic")
+        tableView.backgroundColor = UIColor(resource: .appWhiteDynamic)
         tableView.separatorStyle = .none
         tableView.delegate = self
         tableView.dataSource = self
@@ -44,7 +44,7 @@ final class CatalogViewController: UIViewController, LoadingView {
     
     private lazy var refreshControl: UIRefreshControl = {
         let refreshControl = UIRefreshControl()
-        refreshControl.tintColor = UIColor(named: "appBlackDynamic")
+        refreshControl.tintColor = UIColor(resource: .appBlackDynamic)
         refreshControl.addTarget(self, action: #selector(refreshCatalog), for: .valueChanged)
         return refreshControl
     }()
@@ -71,16 +71,16 @@ final class CatalogViewController: UIViewController, LoadingView {
         fetchCollections()
     }
     
-    @objc func sortButtonTapped() {
+    @objc private func sortButtonTapped() {
         let sortingAlert  = UIAlertController(
-            title: NSLocalizedString("Sorting", comment: ""),
+            title: Localizable.Sorting.title,
             message: nil,
             preferredStyle: .actionSheet
         )
         
         sortingAlert.addAction(
             UIAlertAction(
-                title: NSLocalizedString("Sorting.byName", comment: ""),
+                title: Localizable.Sorting.byName,
                 style: .default
             ) { [weak self] _ in
                 guard let self = self else {
@@ -94,7 +94,7 @@ final class CatalogViewController: UIViewController, LoadingView {
         
         sortingAlert.addAction(
             UIAlertAction(
-                title: NSLocalizedString("Sorting.byQuantity", comment: ""),
+                title: Localizable.Sorting.byQuantity,
                 style: .default
             ) { [weak self] _ in
                 guard let self = self else {
@@ -108,7 +108,7 @@ final class CatalogViewController: UIViewController, LoadingView {
         
         sortingAlert.addAction(
             UIAlertAction(
-                title: NSLocalizedString("Sorting.cancel", comment: ""),
+                title: Localizable.Sorting.cancel,
                 style: .cancel
             )
         )
@@ -212,7 +212,7 @@ extension CatalogViewController: UITableViewDataSource {
         let catalogItem = viewModel.catalogItems[indexPath.row]
         cell.configure(with: catalogItem)
         cell.selectionStyle = .none
-        cell.backgroundColor = UIColor(named: "appWhiteDynamic")
+        cell.backgroundColor = UIColor(resource: .appWhiteDynamic)
         
         return cell
     }

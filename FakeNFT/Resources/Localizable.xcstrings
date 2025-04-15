@@ -99,6 +99,7 @@
       }
     },
     "Sorting" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -115,6 +116,7 @@
       }
     },
     "Sorting.byName" : {
+      "comment" : "Sort by name option",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -131,6 +133,7 @@
       }
     },
     "Sorting.byQuantity" : {
+      "comment" : "Sort by quantity option",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -147,6 +150,7 @@
       }
     },
     "Sorting.cancel" : {
+      "comment" : "Cancel sorting action",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -158,6 +162,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Закрыть"
+          }
+        }
+      }
+    },
+    "Sorting.title" : {
+      "comment" : "Title for sorting action sheet",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Sorting"
           }
         }
       }

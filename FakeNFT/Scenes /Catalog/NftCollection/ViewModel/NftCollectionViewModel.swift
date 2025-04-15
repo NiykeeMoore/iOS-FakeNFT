@@ -88,6 +88,7 @@ final class NftCollectionViewModel: NftCollectionViewModelProtocol {
                     group.enter()
                     self.nftService.loadNft(id: id) { [weak self] result in
                         guard let self = self else {
+                            group.leave()
                             return
                         }
                         switch result {

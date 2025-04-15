@@ -29,30 +29,23 @@ struct LikesRequest: NetworkRequest {
             return nil
         }
         
-        if method == .get {
-            return baseURL
-        }
-        
-        guard let nftsIds = nftsIds else {
+        if method == .get || nftsIds == nil {
             return baseURL
         }
         
         var components = URLComponents(url: baseURL, resolvingAgainstBaseURL: false)
-        if !nftsIds.isEmpty {
+        if let nftsIds = nftsIds, !nftsIds.isEmpty {
             components?.queryItems = nftsIds.map { URLQueryItem(name: "likes", value: $0) }
         }
         return components?.url
     }
     
     var httpMethod: HttpMethod {
-        return method
+        method
     }
     
     var headers: [String: String]? {
-        if method == .put {
-            return ["Content-Type": "application/x-www-form-urlencoded"]
-        }
-        return nil
+        method == .put ? ["Content-Type": "application/x-www-form-urlencoded"] : nil
     }
     
     var dto: Dto? {

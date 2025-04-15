@@ -5,13 +5,6 @@
 //  Created by Никита Соловьев on 02.04.2025.
 //
 
-//
-//  NftCollectionViewCell.swift
-//  FakeNFT
-//
-//  Created by Никита Соловьев on 02.04.2025.
-//
-
 import UIKit
 import Kingfisher
 
@@ -82,7 +75,7 @@ final class NftCollectionViewCell: UICollectionViewCell {
         label.font = UIFont.systemFont(ofSize: 17, weight: .bold)
         label.setContentCompressionResistancePriority(.required, for: .vertical)
         label.numberOfLines = 2
-        label.adjustsFontSizeToFitWidth = true
+        label.adjustsFontSizeToFitWidth = false
         
         return label
     }()
@@ -240,7 +233,7 @@ final class NftCollectionViewCell: UICollectionViewCell {
     }
     
     private func setLikeButtonState(isLiked: Bool) {
-        likeButton.tintColor = isLiked ? UIColor(named: "appRed") : UIColor(named: "appWhite")
+        likeButton.tintColor = isLiked ? UIColor(resource: .appRed) : UIColor(resource: .appWhite)
     }
     
     func setCartButtonState(isAdded: Bool) {
@@ -255,8 +248,8 @@ final class NftCollectionViewCell: UICollectionViewCell {
         
         for (index, starImageView) in arrangedSubviews.enumerated() {
             starImageView.tintColor = index < rating
-            ? UIColor(named: "appYellow")
-            : UIColor(named: "appLightGrayDynamic")
+            ? UIColor(resource: .appYellow)
+            : UIColor(resource: .appLightGrayDynamic)
         }
     }
 }
