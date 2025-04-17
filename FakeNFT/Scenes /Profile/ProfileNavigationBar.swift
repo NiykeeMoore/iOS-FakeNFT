@@ -1,5 +1,5 @@
 //
-//  CustomNavigationBar.swift
+//  ProfileNavigationBar.swift
 //  FakeNFT
 //
 //  Created by Артем Кривдин on 05.04.2025.
@@ -7,7 +7,7 @@
 
 import UIKit
 
-final class CustomNavigationBar: UIView {
+final class ProfileNavigationBar: UIView {
     
     // MARK: - UI Elements
     

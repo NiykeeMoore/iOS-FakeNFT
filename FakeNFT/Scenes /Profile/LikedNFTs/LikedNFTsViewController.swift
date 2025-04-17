@@ -10,7 +10,7 @@ import UIKit
 final class LikedNFTsViewController: UIViewController {
     private var viewModel: LikedNFTsViewModelProtocol
     
-    private let customNavBar = CustomNavigationBar()
+    private let customNavBar = ProfileNavigationBar()
     
     private lazy var emptyNFTsLabel: UILabel = {
         let label = UILabel()

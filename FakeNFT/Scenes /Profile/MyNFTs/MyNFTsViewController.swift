@@ -11,7 +11,7 @@ final class MyNFTsViewController: UIViewController {
     private var viewModel: MyNFTsViewModelProtocol
     private var isEmptyNFT: Bool
     
-    private let customNavBar = CustomNavigationBar()
+    private let customNavBar = ProfileNavigationBar()
     
     private lazy var emptyNFTsLabel: UILabel = {
         let label = UILabel()
