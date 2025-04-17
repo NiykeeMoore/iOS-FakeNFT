@@ -14,7 +14,11 @@ final class NftCollectionViewCell: UICollectionViewCell {
     
     private var isItemInCart: Bool = false
     private var isItemLiked: Bool = false
+    private var isLikeRequestInProgress: Bool = false
+    private var isCartRequestInProgress: Bool = false
     private var itemId: String = ""
+    var onLikeButtonTapped: ((String) -> Void)?
+    var onCartButtonTapped: ((String) -> Void)?
     
     private lazy var nftImageView: UIImageView = {
         let imageView = UIImageView()
@@ -41,6 +45,14 @@ final class NftCollectionViewCell: UICollectionViewCell {
         return button
     }()
     
+    private lazy var likeButtonActivityIndicator: UIActivityIndicatorView = {
+        let indicator = UIActivityIndicatorView(style: .medium)
+        indicator.color = .gray
+        indicator.hidesWhenStopped = true
+        
+        return indicator
+    }()
+    
     private lazy var ratingStackView: UIStackView = {
         let stackView = UIStackView()
         stackView.axis = .horizontal
@@ -63,7 +75,7 @@ final class NftCollectionViewCell: UICollectionViewCell {
         label.font = UIFont.systemFont(ofSize: 17, weight: .bold)
         label.setContentCompressionResistancePriority(.required, for: .vertical)
         label.numberOfLines = 2
-        label.adjustsFontSizeToFitWidth = true
+        label.adjustsFontSizeToFitWidth = false
         
         return label
     }()
@@ -71,6 +83,7 @@ final class NftCollectionViewCell: UICollectionViewCell {
     private lazy var priceLabel: UILabel = {
         let label = UILabel()
         label.font = UIFont.systemFont(ofSize: 10, weight: .medium)
+        label.numberOfLines = 0
         
         return label
     }()
@@ -79,11 +92,15 @@ final class NftCollectionViewCell: UICollectionViewCell {
         let button = UIButton()
         button.setImage(UIImage(named: "cartAdd"), for: .normal)
         button.addTarget(self, action: #selector(cartButtonTapped), for: .touchUpInside)
-        
         return button
     }()
     
-    private lazy var containerView = UIView()
+    private lazy var cartButtonActivityIndicator: UIActivityIndicatorView = {
+        let indicator = UIActivityIndicatorView(style: .medium)
+        indicator.color = .gray
+        indicator.hidesWhenStopped = true
+        return indicator
+    }()
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -95,19 +112,47 @@ final class NftCollectionViewCell: UICollectionViewCell {
     }
     
     @objc func likeButtonTapped() {
+        guard !isLikeRequestInProgress else {
+            return
+        }
         
+        isLikeRequestInProgress = true
+        likeButtonActivityIndicator.startAnimating()
+        likeButton.isEnabled = false
+        
+        let desiredLikeState = !self.isItemLiked
+        self.isItemLiked = desiredLikeState
+        setLikeButtonState(isLiked: desiredLikeState)
+        
+        onLikeButtonTapped?(itemId)
     }
     
     @objc func cartButtonTapped() {
+        guard !isCartRequestInProgress else {
+            return
+        }
         
+        isCartRequestInProgress = true
+        cartButtonActivityIndicator.startAnimating()
+        cartButton.isEnabled = false
+        
+        let desiredCartState = !self.isItemInCart
+        self.isItemInCart = desiredCartState
+        setCartButtonState(isAdded: desiredCartState)
+        
+        onCartButtonTapped?(itemId)
     }
     
     private func setupLayout() {
         [
             nftImageView,
             likeButton,
+            likeButtonActivityIndicator,
             ratingStackView,
-            containerView
+            nameLabel,
+            priceLabel,
+            cartButton,
+            cartButtonActivityIndicator
         ].forEach {
             contentView.addSubview($0)
             $0.translatesAutoresizingMaskIntoConstraints = false
@@ -119,45 +164,44 @@ final class NftCollectionViewCell: UICollectionViewCell {
             nftImageView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
             nftImageView.heightAnchor.constraint(equalTo: contentView.widthAnchor),
             
-            likeButton.heightAnchor.constraint(equalToConstant: 40),
-            likeButton.widthAnchor.constraint(equalToConstant: 40),
             likeButton.topAnchor.constraint(equalTo: contentView.topAnchor),
             likeButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
+            likeButton.widthAnchor.constraint(equalToConstant: 40),
+            likeButton.heightAnchor.constraint(equalToConstant: 40),
+            
+            likeButtonActivityIndicator.centerXAnchor.constraint(equalTo: likeButton.centerXAnchor),
+            likeButtonActivityIndicator.centerYAnchor.constraint(equalTo: likeButton.centerYAnchor),
             
             ratingStackView.topAnchor.constraint(equalTo: nftImageView.bottomAnchor, constant: 8),
             ratingStackView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
             ratingStackView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -40),
             
-            containerView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
-            containerView.topAnchor.constraint(equalTo: ratingStackView.bottomAnchor, constant: 5),
-            containerView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
-            containerView.bottomAnchor.constraint(greaterThanOrEqualTo: contentView.bottomAnchor, constant: -10)
-        ])
-        
-        [
-            nameLabel,
-            priceLabel,
-            cartButton
-        ].forEach {
-            containerView.addSubview($0)
-            $0.translatesAutoresizingMaskIntoConstraints = false
-        }
-        
-        NSLayoutConstraint.activate([
+            nameLabel.topAnchor.constraint(equalTo: ratingStackView.bottomAnchor, constant: 8),
+            nameLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+            nameLabel.trailingAnchor.constraint(equalTo: cartButton.leadingAnchor, constant: -8),
             
-            cartButton.trailingAnchor.constraint(equalTo: containerView.trailingAnchor),
-            cartButton.centerYAnchor.constraint(equalTo: containerView.centerYAnchor),
+            priceLabel.topAnchor.constraint(equalTo: nameLabel.bottomAnchor, constant: 4),
+            priceLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+            priceLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -8),
+            priceLabel.trailingAnchor.constraint(equalTo: cartButton.leadingAnchor, constant: -8),
+            
+            cartButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
+            cartButton.centerYAnchor.constraint(equalTo: priceLabel.centerYAnchor),
             cartButton.widthAnchor.constraint(equalToConstant: 40),
             
-            nameLabel.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
-            nameLabel.topAnchor.constraint(equalTo: containerView.topAnchor),
-            nameLabel.trailingAnchor.constraint(equalTo: cartButton.leadingAnchor),
-            
-            priceLabel.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
-            priceLabel.bottomAnchor.constraint(equalTo: containerView.bottomAnchor),
-            priceLabel.topAnchor.constraint(equalTo: nameLabel.bottomAnchor, constant: 4),
-            priceLabel.trailingAnchor.constraint(equalTo: cartButton.leadingAnchor)
+            cartButtonActivityIndicator.centerXAnchor.constraint(equalTo: cartButton.centerXAnchor),
+            cartButtonActivityIndicator.centerYAnchor.constraint(equalTo: cartButton.centerYAnchor)
         ])
+    }
+    
+    func calculateFittingHeight(for width: CGFloat) -> CGFloat {
+        let targetSize = CGSize(width: width, height: UIView.layoutFittingCompressedSize.height)
+        let fittingSize = contentView.systemLayoutSizeFitting(
+            targetSize,
+            withHorizontalFittingPriority: .required,
+            verticalFittingPriority: .fittingSizeLevel
+        )
+        return fittingSize.height
     }
     
     func configure(with model: NftCollectionCellModel) {
@@ -166,16 +210,33 @@ final class NftCollectionViewCell: UICollectionViewCell {
         let priceString = String(format: "%.2f", model.price)
         priceLabel.text = priceString + " ETH"
         itemId = model.id
+        isItemLiked = model.isLiked
         setLikeButtonState(isLiked: model.isLiked)
         setCartButtonState(isAdded: model.isAddedToCart)
         setRating(rating: model.rating)
     }
     
-    private func setLikeButtonState(isLiked: Bool) {
-        likeButton.tintColor = isLiked ? UIColor(named: "appRed") : UIColor(named: "appWhite")
+    func completeLikeRequest(isLiked: Bool) {
+        isLikeRequestInProgress = false
+        likeButtonActivityIndicator.stopAnimating()
+        likeButton.isEnabled = true
+        self.isItemLiked = isLiked
+        setLikeButtonState(isLiked: isLiked)
     }
     
-    private func setCartButtonState(isAdded: Bool) {
+    func completeCartRequest(isInCart: Bool) {
+        isCartRequestInProgress = false
+        cartButtonActivityIndicator.stopAnimating()
+        cartButton.isEnabled = true
+        self.isItemInCart = isInCart
+        setCartButtonState(isAdded: isInCart)
+    }
+    
+    private func setLikeButtonState(isLiked: Bool) {
+        likeButton.tintColor = isLiked ? UIColor(resource: .appRed) : UIColor(resource: .appWhite)
+    }
+    
+    func setCartButtonState(isAdded: Bool) {
         let image = isAdded ? UIImage(named: "cartDelete") : UIImage(named: "cartAdd")
         cartButton.setImage(image, for: .normal)
     }
@@ -187,8 +248,8 @@ final class NftCollectionViewCell: UICollectionViewCell {
         
         for (index, starImageView) in arrangedSubviews.enumerated() {
             starImageView.tintColor = index < rating
-            ? UIColor(named: "appYellow")
-            : UIColor(named: "appLightGrayDynamic")
+            ? UIColor(resource: .appYellow)
+            : UIColor(resource: .appLightGrayDynamic)
         }
     }
 }

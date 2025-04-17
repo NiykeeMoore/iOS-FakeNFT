@@ -29,8 +29,9 @@ final class TabBarController: UITabBarController {
         
         viewControllers = [catalogNavigationController]
         
-        view.backgroundColor = UIColor(named: "appWhite")
-        tabBar.unselectedItemTintColor = UIColor(named: "appBlack")
+        view.backgroundColor = UIColor(resource: .appWhiteDynamic)
+        tabBar.barTintColor = UIColor(resource: .appWhiteDynamic)
+        tabBar.unselectedItemTintColor = UIColor(resource: .appBlackDynamic)
         tabBar.isTranslucent = false
     }
 }

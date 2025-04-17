@@ -98,6 +98,86 @@
         }
       }
     },
+    "Sorting" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sorting"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сортировка"
+          }
+        }
+      }
+    },
+    "Sorting.byName" : {
+      "comment" : "Sort by name option",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "By name"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "По названию"
+          }
+        }
+      }
+    },
+    "Sorting.byQuantity" : {
+      "comment" : "Sort by quantity option",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "By quantity"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "По количеству"
+          }
+        }
+      }
+    },
+    "Sorting.cancel" : {
+      "comment" : "Cancel sorting action",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancel"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Закрыть"
+          }
+        }
+      }
+    },
+    "Sorting.title" : {
+      "comment" : "Title for sorting action sheet",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Sorting"
+          }
+        }
+      }
+    },
     "Tab.catalog" : {
       "localizations" : {
         "en" : {
