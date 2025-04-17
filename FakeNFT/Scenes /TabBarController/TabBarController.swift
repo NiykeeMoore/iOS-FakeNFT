@@ -1,9 +1,9 @@
 import UIKit
 
 final class TabBarController: UITabBarController {
-
+    
     private let servicesAssembly: ServicesAssembly
-
+    
     init(servicesAssembly: ServicesAssembly) {
         self.servicesAssembly = servicesAssembly
         super.init(nibName: nil, bundle: nil)
@@ -18,17 +18,20 @@ final class TabBarController: UITabBarController {
         image: UIImage(systemName: "square.stack.3d.up.fill"),
         tag: 0
     )
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        let catalogController = TestCatalogViewController(
-            servicesAssembly: servicesAssembly
-        )
-        catalogController.tabBarItem = catalogTabBarItem
-
-        viewControllers = [catalogController]
-
-        view.backgroundColor = .systemBackground
+        
+        let catalogAssembly = CatalogAssembly(servicesAssembly: servicesAssembly)
+        let catalogController = catalogAssembly.build()
+        let catalogNavigationController = UINavigationController(rootViewController: catalogController)
+        catalogNavigationController.tabBarItem = catalogTabBarItem
+        
+        viewControllers = [catalogNavigationController]
+        
+        view.backgroundColor = UIColor(resource: .appWhiteDynamic)
+        tabBar.barTintColor = UIColor(resource: .appWhiteDynamic)
+        tabBar.unselectedItemTintColor = UIColor(resource: .appBlackDynamic)
+        tabBar.isTranslucent = false
     }
 }
