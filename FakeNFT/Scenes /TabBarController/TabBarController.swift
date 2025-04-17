@@ -13,21 +13,35 @@ final class TabBarController: UITabBarController {
         fatalError("init(coder:) has not been implemented")
     }
     
+    private let profileTabBarItem = UITabBarItem(
+        title: NSLocalizedString("Tab.profile", comment: ""),
+        image: UIImage(systemName: "person.crop.circle.fill"),
+        tag: 0
+    )
+    
     private let catalogTabBarItem = UITabBarItem(
         title: NSLocalizedString("Tab.catalog", comment: ""),
         image: UIImage(systemName: "square.stack.3d.up.fill"),
-        tag: 0
+        tag: 1
     )
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        let profileViewModel = ProfileViewModel(
+            profileService: servicesAssembly.profileService,
+            nftService: servicesAssembly.nftService
+        )
+        let profileController = ProfileViewController(viewModel: profileViewModel)
+        let profileNavController = UINavigationController(rootViewController: profileController)
+        profileController.tabBarItem = profileTabBarItem
+
         let catalogAssembly = CatalogAssembly(servicesAssembly: servicesAssembly)
         let catalogController = catalogAssembly.build()
         let catalogNavigationController = UINavigationController(rootViewController: catalogController)
         catalogNavigationController.tabBarItem = catalogTabBarItem
         
-        viewControllers = [catalogNavigationController]
+        viewControllers = [profileNavController, catalogNavigationController]
         
         view.backgroundColor = UIColor(resource: .appWhiteDynamic)
         tabBar.barTintColor = UIColor(resource: .appWhiteDynamic)
