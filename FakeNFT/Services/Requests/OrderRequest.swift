@@ -27,7 +27,7 @@ struct OrderRequest: NetworkRequest {
         
         var components = URLComponents(url: baseURL, resolvingAgainstBaseURL: false)
         if let nftsIds = nftsIds, !nftsIds.isEmpty {
-            components?.queryItems = nftsIds.map { URLQueryItem(name: "likes", value: $0) }
+            components?.queryItems = nftsIds.map { URLQueryItem(name: "nfts", value: $0) }
         }
         return components?.url
     }

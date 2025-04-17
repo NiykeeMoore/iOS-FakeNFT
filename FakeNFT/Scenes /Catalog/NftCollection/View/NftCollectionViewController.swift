@@ -119,7 +119,7 @@ final class NftCollectionViewController: UIViewController, LoadingView {
             url: url,
             configuration: config
         )
-        safariVC.preferredControlTintColor = UIColor(resource: .appWhiteDynamic)
+        safariVC.preferredControlTintColor = UIColor(resource: .appBlackDynamic)
         present(safariVC, animated: true)
     }
     
