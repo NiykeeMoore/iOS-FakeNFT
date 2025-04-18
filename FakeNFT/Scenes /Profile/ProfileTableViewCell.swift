@@ -36,6 +36,7 @@ final class ProfileTableViewCell: UITableViewCell {
         preservesSuperviewLayoutMargins = false
         contentView.preservesSuperviewLayoutMargins = false
         contentView.layoutMargins = .zero
+        contentView.backgroundColor = UIColor(named: "appWhiteDynamic")
         
         // Customize selection
         selectionStyle = .none
