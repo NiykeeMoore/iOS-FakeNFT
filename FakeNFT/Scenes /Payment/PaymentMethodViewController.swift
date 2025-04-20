@@ -218,6 +218,7 @@ final class PaymentMethodViewController: UIViewController,
                 return
             }
             self.activityIndicator.stopAnimating()
+            self.navigateToSuccessScreen()
         }
         
         viewModel.onPaymentFailed = { [weak self] errorModel in
@@ -226,7 +227,34 @@ final class PaymentMethodViewController: UIViewController,
             }
             self.activityIndicator.stopAnimating()
             self.payButton.isEnabled = true
-            print(errorModel)
+            
+            let alert = UIAlertController(
+                title: errorModel.actionText,
+                message: errorModel.message,
+                preferredStyle: .alert
+            )
+            
+            alert.addAction(
+                UIAlertAction(
+                    title: NSLocalizedString("Error.cancel", comment: ""),
+                    style: .default,
+                    handler: nil
+                )
+            )
+            
+            alert.addAction(
+                UIAlertAction(
+                    title: NSLocalizedString("Error.repeat", comment: ""),
+                    style: .cancel
+                ) { [weak self] _ in
+                    guard let self else {
+                        return
+                    }
+                    self.viewModel.performPayment()
+                }
+            )
+            
+            present(alert, animated: true, completion: nil)
         }
     }
     
@@ -288,6 +316,22 @@ final class PaymentMethodViewController: UIViewController,
     
     private func updatePayButtonState() {
         payButton.isEnabled = selectedIndexPath != nil
+    }
+    
+    private func navigateToSuccessScreen() {
+        let successVC = PaymentSuccessViewController()
+        
+        successVC.onDismiss = { [weak self] in
+            guard let self else {
+                return
+            }
+            
+            self.dismiss(animated: true) {
+                self.navigationController?.popToRootViewController(animated: true)
+            }
+        }
+        successVC.modalPresentationStyle = .fullScreen
+        present(successVC, animated: true)
     }
     
     // MARK: - Actions
