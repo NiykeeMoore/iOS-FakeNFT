@@ -9,9 +9,9 @@ import Foundation
 
 import UIKit
 
-struct PaymentMethod {
+struct PaymentMethod: Decodable, Identifiable {
     let id: String
     let name: String
-    let abbreviation: String
-    let icon: URL?
+    let title: String
+    let image: String
 }

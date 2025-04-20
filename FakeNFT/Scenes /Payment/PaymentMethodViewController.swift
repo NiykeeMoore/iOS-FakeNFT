@@ -6,10 +6,16 @@
 //
 
 import UIKit
+import Combine
 
 final class PaymentMethodViewController: UIViewController,
                                          UICollectionViewDelegateFlowLayout,
                                          UICollectionViewDelegate, UICollectionViewDataSource {
+    // MARK: - Dependencies & State
+    private var viewModel: PaymentViewModelProtocol
+    var activityIndicator = UIActivityIndicatorView(style: .large)
+    private var selectedIndexPath: IndexPath?
+    
     // MARK: - UI Elements
     private lazy var collectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
@@ -74,10 +80,15 @@ final class PaymentMethodViewController: UIViewController,
         return button
     }()
     
-    // MARK: - Properties
+    // MARK: - Initialization
+    init(viewModel: PaymentViewModelProtocol) {
+        self.viewModel = viewModel
+        super.init(nibName: nil, bundle: nil)
+    }
     
-    private var paymentMethods: [PaymentMethod] = []
-    private var selectedIndexPath: IndexPath?
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
     
     // MARK: - Lifecycle
     
@@ -86,8 +97,8 @@ final class PaymentMethodViewController: UIViewController,
         setupNavigationBar()
         setupViews()
         setupConstraints()
-        loadMockData()
-        selectInitialItem()
+        bindViewModel()
+        viewModel.loadPaymentMethods()
     }
     
     // MARK: - Setup
@@ -109,7 +120,7 @@ final class PaymentMethodViewController: UIViewController,
     private func setupViews() {
         view.backgroundColor = UIColor(named: "appWhiteDynamic")
         
-        [collectionView, bottomContainerView].forEach {
+        [collectionView, bottomContainerView, activityIndicator].forEach {
             $0.translatesAutoresizingMaskIntoConstraints = false
             view.addSubview($0)
         }
@@ -128,6 +139,9 @@ final class PaymentMethodViewController: UIViewController,
         let buttonHeight: CGFloat = 60
         
         NSLayoutConstraint.activate([
+            activityIndicator.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            activityIndicator.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+            
             collectionView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: topCollectionViewMargin),
             collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
@@ -148,23 +162,50 @@ final class PaymentMethodViewController: UIViewController,
             payButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -verticalMargin)
         ])
     }
-    
-    // MARK: - Data Loading (Mock)
-    
-    private func loadMockData() {
-        paymentMethods = [
-            PaymentMethod(id: "1", name: "Bitcoin", abbreviation: "BTC", icon: URL(string: "https://code.s3.yandex.net/Mobile/iOS/Currencies/Bitcoin.png")),
-            PaymentMethod(id: "2", name: "Dogecoin", abbreviation: "DOGE", icon: URL(string: "https://code.s3.yandex.net/Mobile/iOS/Currencies/Dogecoin.png")),
-            PaymentMethod(id: "3", name: "USDT", abbreviation: "Card", icon: URL(string: "https://code.s3.yandex.net/Mobile/iOS/Currencies/Card(USD).png")),
-            PaymentMethod(id: "4", name: "Etherium", abbreviation: "ETH", icon: URL(string: "https://code.s3.yandex.net/Mobile/iOS/Currencies/Etherium.png")),
-            PaymentMethod(id: "6", name: "Tether", abbreviation: "USDT", icon: URL(string: "https://code.s3.yandex.net/Mobile/iOS/Currencies/Tether(USDT).png")),
-            PaymentMethod(id: "7", name: "Ape Coin", abbreviation: "APE", icon: URL(string: "https://code.s3.yandex.net/Mobile/iOS/Currencies/ApeCoin.png")),
-            PaymentMethod(id: "8", name: "Solana", abbreviation: "SOL", icon: URL(string: "https://code.s3.yandex.net/Mobile/iOS/Currencies/Solana.png")),
-            PaymentMethod(id: "9", name: "Shiba Inu", abbreviation: "SHIB", icon: URL(string: "https://code.s3.yandex.net/Mobile/iOS/Currencies/ShibaInu.png"))
-        ]
-        collectionView.reloadData()
-    }
     // swiftlint:enable line_length
+    
+    // MARK: - Bindings
+    private func bindViewModel() {
+        viewModel.onStateChange = { [weak self] state in
+            guard let self else {
+                return
+            }
+            
+            switch state {
+            case .initial:
+                self.activityIndicator.stopAnimating()
+                
+            case .loading:
+                self.activityIndicator.startAnimating()
+                
+            case .loaded:
+                self.activityIndicator.stopAnimating()
+                
+            case .error(let error):
+                self.activityIndicator.stopAnimating()
+                
+                let errorModel = ErrorModel(
+                    message: error.localizedDescription,
+                    actionText: NSLocalizedString("Error.repeat", comment: "")
+                ) {
+                    self.viewModel.loadPaymentMethods()
+                }
+                print(errorModel)
+            }
+        }
+        
+        viewModel.onPaymentMethodsChange = { [weak self] in
+            guard let self else {
+                return
+            }
+            
+            DispatchQueue.main.async {
+                self.collectionView.reloadData()
+                self.selectInitialItem()
+                self.updatePayButtonState()
+            }
+        }
+    }
     
     // MARK: - UICollectionViewDelegateFlowLayout
     func collectionView(
@@ -185,7 +226,7 @@ final class PaymentMethodViewController: UIViewController,
     
     // MARK: - UICollectionViewDataSource
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return paymentMethods.count
+        return viewModel.paymentMethods.count
     }
     
     func collectionView(
@@ -198,7 +239,7 @@ final class PaymentMethodViewController: UIViewController,
         ) as? PaymentMethodCell else {
             return UICollectionViewCell()
         }
-        let method = paymentMethods[indexPath.item]
+        let method = viewModel.paymentMethods[indexPath.item]
         cell.configure(with: method)
         return cell
     }
@@ -208,11 +249,12 @@ final class PaymentMethodViewController: UIViewController,
         if selectedIndexPath != indexPath {
             selectedIndexPath = indexPath
         }
-        print("Selected: \(paymentMethods[indexPath.item].name)")
+        print("Selected: \(viewModel.paymentMethods[indexPath.item].name)")
     }
     
+    // MARK: - Helper Methods
     private func selectInitialItem() {
-        if !paymentMethods.isEmpty {
+        if !viewModel.paymentMethods.isEmpty {
             let firstIndexPath = IndexPath(item: 0, section: 0)
             collectionView.selectItem(at: firstIndexPath, animated: false, scrollPosition: [])
             selectedIndexPath = firstIndexPath
@@ -222,6 +264,10 @@ final class PaymentMethodViewController: UIViewController,
                 cell.isSelected = true
             }
         }
+    }
+    
+    private func updatePayButtonState() {
+        payButton.isEnabled = selectedIndexPath != nil
     }
     
     // MARK: - Actions
@@ -236,7 +282,7 @@ final class PaymentMethodViewController: UIViewController,
             print("No payment method selected")
             return
         }
-        let selectedMethod = paymentMethods[selectedIndexPath.item]
+        let selectedMethod = viewModel.paymentMethods[selectedIndexPath.item]
         print("Proceed to pay with: \(selectedMethod.name) (ID: \(selectedMethod.id))")
         
     }

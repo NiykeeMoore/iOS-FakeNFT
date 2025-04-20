@@ -8,8 +8,17 @@
 import UIKit
 
 final class PaymentAssembly {
+    private let servicesAssembler: ServicesAssembly
+    
+    init(servicesAssembler: ServicesAssembly) {
+        self.servicesAssembler = servicesAssembler
+    }
+    
     func build() -> UIViewController {
-        let viewController = PaymentMethodViewController()
+        let networkClient = servicesAssembler.networkClient
+        let paymentService = PaymentService(networkClient: networkClient)
+        let viewModel = PaymentViewModel(paymentService: paymentService)
+        let viewController = PaymentMethodViewController(viewModel: viewModel)
         return viewController
     }
 }

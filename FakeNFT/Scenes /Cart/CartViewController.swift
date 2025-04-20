@@ -16,6 +16,7 @@ final class CartViewController: UIViewController, UITableViewDelegate, UITableVi
     }()
     
     private var viewModel: CartViewModel
+    private let serviceAssembly: ServicesAssembly
     
     private lazy var nftListTableView: UITableView = {
         let tableView = UITableView()
@@ -63,8 +64,9 @@ final class CartViewController: UIViewController, UITableViewDelegate, UITableVi
     }()
     
     // MARK: - Init
-    init(viewModel: CartViewModel) {
+    init(viewModel: CartViewModel, serviceAssembly: ServicesAssembly) {
         self.viewModel = viewModel
+        self.serviceAssembly = serviceAssembly
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -263,8 +265,9 @@ final class CartViewController: UIViewController, UITableViewDelegate, UITableVi
     }
     
     @objc private func didTapPayButton() {
-        let paymentViewController = PaymentMethodViewController()
-        paymentViewController.hidesBottomBarWhenPushed = true
-        navigationController?.pushViewController(paymentViewController, animated: true)
+        let paymentAssembly = PaymentAssembly(servicesAssembler: serviceAssembly)
+        let paymentVC = paymentAssembly.build()
+        paymentVC.hidesBottomBarWhenPushed = true
+        navigationController?.pushViewController(paymentVC, animated: true)
     }
 }

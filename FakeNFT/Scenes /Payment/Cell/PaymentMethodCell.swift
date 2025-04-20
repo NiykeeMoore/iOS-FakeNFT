@@ -95,34 +95,26 @@ final class PaymentMethodCell: UICollectionViewCell {
     
     func configure(with method: PaymentMethod) {
         nameLabel.text = method.name
-        abbreviationLabel.text = method.abbreviation
-        
-        let placeholderImage = UIImage(systemName: "creditcard.fill")?
-            .withTintColor(UIColor(named: "appWhiteDynamic") ?? .white, renderingMode: .alwaysOriginal)
+        abbreviationLabel.text = method.title
         
         iconImageView.backgroundColor = UIColor(named: "appBlackDynamic")
         
-        iconImageView.kf.setImage(
-            with: method.icon,
-            placeholder: placeholderImage,
-            options: [
-                .transition(.fade(0.2))
-            ]
-        ) { [weak self] result in
-            guard let self else {
-                return
+        if let url = URL(string: method.image) {
+            iconImageView.kf.setImage(with: url) { [weak self] result in
+                guard let self else {
+                    return
+                }
+                switch result {
+                case .success:
+                    self.iconImageView.backgroundColor = .clear
+                    self.iconImageView.contentMode = .scaleAspectFit
+                case .failure:
+                    self.iconImageView.backgroundColor = UIColor(named: "appBlackDynamic")
+                    self.iconImageView.contentMode = .center
+                }
             }
-            switch result {
-            case .success:
-                self.iconImageView.backgroundColor = .clear
-                self.iconImageView.contentMode = .scaleAspectFit
-            case .failure:
-                self.iconImageView.backgroundColor = UIColor(named: "appBlackDynamic")
-                self.iconImageView.contentMode = .center
-                self.iconImageView.image = placeholderImage
-            }
+            updateSelectionAppearance()
         }
-        updateSelectionAppearance()
     }
     
     // MARK: - Setup
@@ -141,7 +133,6 @@ final class PaymentMethodCell: UICollectionViewCell {
             containerView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
             
             iconImageView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 12),
-            iconImageView.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 12),
             iconImageView.centerYAnchor.constraint(equalTo: containerView.centerYAnchor),
             iconImageView.widthAnchor.constraint(equalToConstant: 36),
             iconImageView.heightAnchor.constraint(equalToConstant: 36),
