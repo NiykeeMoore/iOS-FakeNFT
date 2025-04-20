@@ -10,10 +10,11 @@ import SafariServices
 
 final class PaymentMethodViewController: UIViewController,
                                          UICollectionViewDelegateFlowLayout,
-                                         UICollectionViewDelegate, UICollectionViewDataSource {
+                                         UICollectionViewDelegate, UICollectionViewDataSource,
+                                         LoadingView {
     // MARK: - Dependencies & State
     private var viewModel: PaymentViewModelProtocol
-    var activityIndicator = UIActivityIndicatorView(style: .large)
+    var activityIndicator = UIActivityIndicatorView()
     private var selectedIndexPath: IndexPath?
     
     // MARK: - UI Elements
@@ -177,16 +178,16 @@ final class PaymentMethodViewController: UIViewController,
             
             switch state {
             case .initial:
-                self.activityIndicator.stopAnimating()
+                self.hideLoading()
                 
             case .loading:
-                self.activityIndicator.startAnimating()
+                self.showLoading()
                 
             case .loaded:
-                self.activityIndicator.stopAnimating()
+                self.hideLoading()
                 
             case .error(let error):
-                self.activityIndicator.stopAnimating()
+                self.hideLoading()
                 
                 let errorModel = ErrorModel(
                     message: error.localizedDescription,
@@ -214,7 +215,7 @@ final class PaymentMethodViewController: UIViewController,
             guard let self else {
                 return
             }
-            self.activityIndicator.startAnimating()
+            self.showLoading()
             self.payButton.isEnabled = false
         }
         

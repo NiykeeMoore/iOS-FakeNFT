@@ -64,6 +64,14 @@ final class CartViewController: UIViewController, UITableViewDelegate, UITableVi
         return button
     }()
     
+    private lazy var placeholderLabel: UILabel = {
+        let label = UILabel()
+        label.text = NSLocalizedString("cart_empty_placeholder", comment: "")
+        label.font = .boldSystemFont(ofSize: 17)
+        label.isHidden = true
+        return label
+    }()
+    
     // MARK: - Init
     init(viewModel: CartViewModel, serviceAssembly: ServicesAssembly) {
         self.viewModel = viewModel
@@ -134,7 +142,7 @@ final class CartViewController: UIViewController, UITableViewDelegate, UITableVi
             $0.translatesAutoresizingMaskIntoConstraints = false
         }
         
-        [nftListTableView, bottomPaymentView, activityIndicator].forEach {
+        [nftListTableView, bottomPaymentView, activityIndicator, placeholderLabel].forEach {
             view.addSubview($0)
             $0.translatesAutoresizingMaskIntoConstraints = false
         }
@@ -160,6 +168,9 @@ final class CartViewController: UIViewController, UITableViewDelegate, UITableVi
         NSLayoutConstraint.activate([
             activityIndicator.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             activityIndicator.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+            
+            placeholderLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            placeholderLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor),
             
             nftListTableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
             nftListTableView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
@@ -198,9 +209,16 @@ final class CartViewController: UIViewController, UITableViewDelegate, UITableVi
             guard let self else {
                 return
             }
-            self.totalNftCountLabel.text = "\(count) NFT"
-            self.totalPriceLabel.text = price
-            self.payButton.isEnabled = count > 0
+            if viewModel.numberOfItems() == 0 {
+                navigationController?.navigationBar.isHidden = true
+                nftListTableView.isHidden = true
+                bottomPaymentView.isHidden = true
+                placeholderLabel.isHidden = false
+            } else {
+                self.totalNftCountLabel.text = "\(count) NFT"
+                self.totalPriceLabel.text = price
+                self.payButton.isEnabled = count > 0
+            }
         }
         
         viewModel.onLoadingStateChange = { [weak self] isLoading in
@@ -208,7 +226,9 @@ final class CartViewController: UIViewController, UITableViewDelegate, UITableVi
                 return
             }
             
-            payButton.isEnabled = !isLoading
+            navigationController?.isNavigationBarHidden = isLoading
+            bottomPaymentView.isHidden = isLoading
+            
             // swiftlint:disable:next void_function_in_ternary
             isLoading ? self.showLoading() : self.hideLoading()
         }

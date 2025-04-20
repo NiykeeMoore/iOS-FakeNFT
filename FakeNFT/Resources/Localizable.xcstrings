@@ -49,6 +49,22 @@
         }
       }
     },
+    "cart_empty_placeholder" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cart is empty"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Корзина пуста"
+          }
+        }
+      }
+    },
     "cart_nav_sortAlert_cancel" : {
       "localizations" : {
         "en" : {
