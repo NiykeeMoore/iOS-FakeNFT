@@ -295,7 +295,7 @@
 		3F6806C729CBBC5B00B4F915 /* Scenes  */ = {
 			isa = PBXGroup;
 			children = (
-				4BC23ED72DB504DC000C9CC7 /* PaymentSucces */,
+				4BC23ED72DB504DC000C9CC7 /* PaymentSuccess */,
 				4BC23EC02DB37A22000C9CC7 /* Payment */,
 				4B7756E82D93FC8C00863657 /* Cart */,
 				E1A1B9D82AA01C9700C3AFBC /* TabBarController */,
@@ -445,12 +445,12 @@
 			path = Cell;
 			sourceTree = "<group>";
 		};
-		4BC23ED72DB504DC000C9CC7 /* PaymentSucces */ = {
+		4BC23ED72DB504DC000C9CC7 /* PaymentSuccess */ = {
 			isa = PBXGroup;
 			children = (
 				4BC23ED82DB504E7000C9CC7 /* PaymentSuccessViewController.swift */,
 			);
-			path = PaymentSucces;
+			path = PaymentSuccess;
 			sourceTree = "<group>";
 		};
 		E19CD5A92A98B55900CA39A5 /* Cell */ = {

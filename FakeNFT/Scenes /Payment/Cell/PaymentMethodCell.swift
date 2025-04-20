@@ -84,7 +84,7 @@ final class PaymentMethodCell: UICollectionViewCell {
         super.init(frame: frame)
         setupViews()
         setupConstraints()
-        updateSelectionAppearance()
+        //        updateSelectionAppearance()
     }
     
     required init?(coder: NSCoder) {

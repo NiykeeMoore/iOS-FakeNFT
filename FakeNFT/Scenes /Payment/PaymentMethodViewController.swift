@@ -81,7 +81,6 @@ final class PaymentMethodViewController: UIViewController,
         button.layer.cornerRadius = 16
         button.layer.masksToBounds = true
         button.addTarget(self, action: #selector(didTapPayButton), for: .touchUpInside)
-        button.isEnabled = false
         return button
     }()
     
@@ -206,8 +205,6 @@ final class PaymentMethodViewController: UIViewController,
             
             DispatchQueue.main.async {
                 self.collectionView.reloadData()
-                self.selectInitialItem()
-                self.updatePayButtonState()
             }
         }
         
@@ -223,7 +220,7 @@ final class PaymentMethodViewController: UIViewController,
             guard let self else {
                 return
             }
-            self.activityIndicator.stopAnimating()
+            self.hideLoading()
             self.navigateToSuccessScreen()
         }
         
@@ -231,8 +228,7 @@ final class PaymentMethodViewController: UIViewController,
             guard let self else {
                 return
             }
-            self.activityIndicator.stopAnimating()
-            self.payButton.isEnabled = true
+            self.hideLoading()
             
             let alert = UIAlertController(
                 title: errorModel.actionText,
@@ -304,27 +300,9 @@ final class PaymentMethodViewController: UIViewController,
     // MARK: - UICollectionViewDelegate
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         viewModel.selectPaymentMethod(index: indexPath.item)
-        payButton.isEnabled = true
     }
     
     // MARK: - Helper Methods
-    private func selectInitialItem() {
-        if !viewModel.paymentMethods.isEmpty {
-            let firstIndexPath = IndexPath(item: 0, section: 0)
-            collectionView.selectItem(at: firstIndexPath, animated: false, scrollPosition: [])
-            selectedIndexPath = firstIndexPath
-            
-            collectionView.layoutIfNeeded()
-            if let cell = collectionView.cellForItem(at: firstIndexPath) as? PaymentMethodCell {
-                cell.isSelected = true
-            }
-        }
-    }
-    
-    private func updatePayButtonState() {
-        payButton.isEnabled = selectedIndexPath != nil
-    }
-    
     private func navigateToSuccessScreen() {
         let successVC = PaymentSuccessViewController()
         
