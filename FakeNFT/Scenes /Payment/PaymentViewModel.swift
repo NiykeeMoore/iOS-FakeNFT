@@ -89,8 +89,8 @@ final class PaymentViewModel: PaymentViewModelProtocol {
     func performPayment() {
         guard let currencyId = selectedPaymentMethodId else {
             let errorModel = ErrorModel(
-                message: NSLocalizedString("payment_error_noMethodSelected", comment: ""),
-                actionText: NSLocalizedString("payment_error_alert_ok", comment: "")
+                message: "",
+                actionText: NSLocalizedString("payment_error_noMethodSelected", comment: "")
             ) {
                 
             }
@@ -112,8 +112,8 @@ final class PaymentViewModel: PaymentViewModelProtocol {
                     self.onPaymentSuccess?()
                 } else {
                     let errorModel = ErrorModel(
-                        message: NSLocalizedString("payment_error_serverRejected", comment: ""),
-                        actionText: NSLocalizedString("payment_error_alert_ok", comment: "")
+                        message: "",
+                        actionText: NSLocalizedString("payment_error_serverRejected", comment: "")
                     ) {
                         
                     }

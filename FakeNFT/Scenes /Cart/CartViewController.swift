@@ -60,6 +60,7 @@ final class CartViewController: UIViewController, UITableViewDelegate, UITableVi
         button.backgroundColor = UIColor(named: "appBlackDynamic")
         button.layer.cornerRadius = 16
         button.addTarget(self, action: #selector(didTapPayButton), for: .touchUpInside)
+        button.isEnabled = false
         return button
     }()
     
@@ -127,6 +128,7 @@ final class CartViewController: UIViewController, UITableViewDelegate, UITableVi
     // MARK: - UI Setup
     
     private func setupUI() {
+        
         [totalNftCountLabel, totalPriceLabel, payButton].forEach {
             bottomPaymentView.addSubview($0)
             $0.translatesAutoresizingMaskIntoConstraints = false
@@ -206,6 +208,7 @@ final class CartViewController: UIViewController, UITableViewDelegate, UITableVi
                 return
             }
             
+            payButton.isEnabled = !isLoading
             // swiftlint:disable:next void_function_in_ternary
             isLoading ? self.showLoading() : self.hideLoading()
         }

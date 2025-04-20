@@ -165,7 +165,7 @@
       "localizations" : {
         "en" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "Cancel"
           }
         },
@@ -271,22 +271,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Оплатить"
-          }
-        }
-      }
-    },
-    "payment_error_alert_ok" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "OK"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ОК"
           }
         }
       }

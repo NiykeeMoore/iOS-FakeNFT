@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import SafariServices
 
 final class PaymentMethodViewController: UIViewController,
                                          UICollectionViewDelegateFlowLayout,
@@ -56,6 +57,9 @@ final class PaymentMethodViewController: UIViewController,
         label.textColor = UIColor(named: "appBlue")
         label.text = NSLocalizedString("payment_terms_link", comment: "")
         label.isUserInteractionEnabled = true
+        
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(didTapTermsLink))
+        label.addGestureRecognizer(tapGesture)
         return label
     }()
     
@@ -76,6 +80,7 @@ final class PaymentMethodViewController: UIViewController,
         button.layer.cornerRadius = 16
         button.layer.masksToBounds = true
         button.addTarget(self, action: #selector(didTapPayButton), for: .touchUpInside)
+        button.isEnabled = false
         return button
     }()
     
@@ -236,14 +241,6 @@ final class PaymentMethodViewController: UIViewController,
             
             alert.addAction(
                 UIAlertAction(
-                    title: NSLocalizedString("Error.cancel", comment: ""),
-                    style: .default,
-                    handler: nil
-                )
-            )
-            
-            alert.addAction(
-                UIAlertAction(
                     title: NSLocalizedString("Error.repeat", comment: ""),
                     style: .cancel
                 ) { [weak self] _ in
@@ -252,6 +249,14 @@ final class PaymentMethodViewController: UIViewController,
                     }
                     self.viewModel.performPayment()
                 }
+            )
+            
+            alert.addAction(
+                UIAlertAction(
+                    title: NSLocalizedString("Error.cancel", comment: ""),
+                    style: .default,
+                    handler: nil
+                )
             )
             
             present(alert, animated: true, completion: nil)
@@ -298,6 +303,7 @@ final class PaymentMethodViewController: UIViewController,
     // MARK: - UICollectionViewDelegate
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         viewModel.selectPaymentMethod(index: indexPath.item)
+        payButton.isEnabled = true
     }
     
     // MARK: - Helper Methods
@@ -342,5 +348,14 @@ final class PaymentMethodViewController: UIViewController,
     
     @objc private func didTapPayButton() {
         viewModel.performPayment()
+    }
+    
+    @objc private func didTapTermsLink() {
+        guard let url = URL(string: "https://yandex.ru/legal/practicum_termsofuse/") else {
+            return
+        }
+        
+        let safariVC = SFSafariViewController(url: url)
+        present(safariVC, animated: true, completion: nil)
     }
 }
