@@ -9,6 +9,7 @@ import Foundation
 
 protocol PaymentServiceProtocol {
     func loadPaymentMethods(completion: @escaping (Result<[PaymentMethod], Error>) -> Void)
+    func performPayment(currencyId: String, completion: @escaping (Result<PaymentResult, Error>) -> Void)
 }
 
 final class PaymentService: PaymentServiceProtocol {
@@ -25,5 +26,10 @@ final class PaymentService: PaymentServiceProtocol {
                 completion(result)
             }
         }
+    }
+    
+    func performPayment(currencyId: String, completion: @escaping (Result<PaymentResult, Error>) -> Void) {
+        let request = PerformPaymentRequest(currencyId: currencyId)
+        networkClient.send(request: request, type: PaymentResult.self, completionQueue: .main, onResponse: completion)
     }
 }

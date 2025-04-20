@@ -6,7 +6,6 @@
 //
 
 import UIKit
-import Combine
 
 final class PaymentMethodViewController: UIViewController,
                                          UICollectionViewDelegateFlowLayout,
@@ -205,6 +204,30 @@ final class PaymentMethodViewController: UIViewController,
                 self.updatePayButtonState()
             }
         }
+        
+        viewModel.onPaymentProcessing = { [weak self] in
+            guard let self else {
+                return
+            }
+            self.activityIndicator.startAnimating()
+            self.payButton.isEnabled = false
+        }
+        
+        viewModel.onPaymentSuccess = { [weak self] in
+            guard let self else {
+                return
+            }
+            self.activityIndicator.stopAnimating()
+        }
+        
+        viewModel.onPaymentFailed = { [weak self] errorModel in
+            guard let self else {
+                return
+            }
+            self.activityIndicator.stopAnimating()
+            self.payButton.isEnabled = true
+            print(errorModel)
+        }
     }
     
     // MARK: - UICollectionViewDelegateFlowLayout
@@ -246,10 +269,7 @@ final class PaymentMethodViewController: UIViewController,
     
     // MARK: - UICollectionViewDelegate
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        if selectedIndexPath != indexPath {
-            selectedIndexPath = indexPath
-        }
-        print("Selected: \(viewModel.paymentMethods[indexPath.item].name)")
+        viewModel.selectPaymentMethod(index: indexPath.item)
     }
     
     // MARK: - Helper Methods
@@ -277,13 +297,6 @@ final class PaymentMethodViewController: UIViewController,
     }
     
     @objc private func didTapPayButton() {
-        guard let selectedIndexPath = selectedIndexPath else {
-            
-            print("No payment method selected")
-            return
-        }
-        let selectedMethod = viewModel.paymentMethods[selectedIndexPath.item]
-        print("Proceed to pay with: \(selectedMethod.name) (ID: \(selectedMethod.id))")
-        
+        viewModel.performPayment()
     }
 }
