@@ -17,8 +17,6 @@ final class CartViewController: UIViewController, UITableViewDelegate, UITableVi
     
     private var viewModel: CartViewModel
     
-    private lazy var customNavBar = CustomNavigationBar()
-    
     private lazy var nftListTableView: UITableView = {
         let tableView = UITableView()
         tableView.backgroundColor = .clear
@@ -30,11 +28,12 @@ final class CartViewController: UIViewController, UITableViewDelegate, UITableVi
         return tableView
     }()
     
-    private lazy var footerView: UIView = {
+    private lazy var bottomPaymentView: UIView = {
         let view = UIView()
         view.backgroundColor = UIColor(named: "appLightGrayDynamic")
-        view.clipsToBounds = true
         view.layer.cornerRadius = 12
+        view.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
+        view.layer.masksToBounds = true
         return view
     }()
     
@@ -59,6 +58,7 @@ final class CartViewController: UIViewController, UITableViewDelegate, UITableVi
         button.setTitleColor(UIColor(named: "appWhiteDynamic"), for: .normal)
         button.backgroundColor = UIColor(named: "appBlackDynamic")
         button.layer.cornerRadius = 16
+        button.addTarget(self, action: #selector(didTapPayButton), for: .touchUpInside)
         return button
     }()
     
@@ -67,7 +67,7 @@ final class CartViewController: UIViewController, UITableViewDelegate, UITableVi
         self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
     }
-
+    
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -126,11 +126,11 @@ final class CartViewController: UIViewController, UITableViewDelegate, UITableVi
     
     private func setupUI() {
         [totalNftCountLabel, totalPriceLabel, payButton].forEach {
-            footerView.addSubview($0)
+            bottomPaymentView.addSubview($0)
             $0.translatesAutoresizingMaskIntoConstraints = false
         }
         
-        [customNavBar, nftListTableView, footerView, activityIndicator].forEach {
+        [nftListTableView, bottomPaymentView, activityIndicator].forEach {
             view.addSubview($0)
             $0.translatesAutoresizingMaskIntoConstraints = false
         }
@@ -140,15 +140,14 @@ final class CartViewController: UIViewController, UITableViewDelegate, UITableVi
     }
     
     private func setupNavigationBar() {
-        customNavBar.backgroundColor = .clear
-        
-        customNavBar.configure(
-            leftButtonImage: nil,
-            title: nil,
-            rightButtonImage: UIImage(named: "iconNavBarSort")
+        let sortButton = UIBarButtonItem(
+            image: UIImage(named: "iconNavBarSort"),
+            style: .plain,
+            target: self,
+            action: #selector(rightButtonTapped)
         )
-        
-        customNavBar.setRightButtonTarget(target: self, action: #selector(rightButtonTapped))
+        sortButton.tintColor = UIColor(named: "appBlackDynamic")
+        navigationItem.rightBarButtonItem = sortButton
     }
     
     // MARK: - Constraints
@@ -158,32 +157,27 @@ final class CartViewController: UIViewController, UITableViewDelegate, UITableVi
             activityIndicator.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             activityIndicator.centerYAnchor.constraint(equalTo: view.centerYAnchor),
             
-            customNavBar.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            customNavBar.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            customNavBar.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            customNavBar.heightAnchor.constraint(equalToConstant: 44),
-            
-            nftListTableView.topAnchor.constraint(equalTo: customNavBar.bottomAnchor, constant: 20),
+            nftListTableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
             nftListTableView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
             nftListTableView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
-            nftListTableView.bottomAnchor.constraint(equalTo: footerView.topAnchor),
+            nftListTableView.bottomAnchor.constraint(equalTo: bottomPaymentView.topAnchor),
             
-            footerView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
-            footerView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
-            footerView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
-            footerView.heightAnchor.constraint(equalToConstant: 75),
+            bottomPaymentView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            bottomPaymentView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            bottomPaymentView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
+            bottomPaymentView.heightAnchor.constraint(equalToConstant: 76),
             
-            totalNftCountLabel.topAnchor.constraint(equalTo: footerView.topAnchor, constant: 16),
-            totalNftCountLabel.leadingAnchor.constraint(equalTo: footerView.leadingAnchor, constant: 16),
-            totalNftCountLabel.bottomAnchor.constraint(equalTo: totalPriceLabel.topAnchor, constant: 2),
+            totalNftCountLabel.topAnchor.constraint(equalTo: bottomPaymentView.topAnchor, constant: 16),
+            totalNftCountLabel.leadingAnchor.constraint(equalTo: bottomPaymentView.leadingAnchor, constant: 16),
             
+            totalPriceLabel.topAnchor.constraint(equalTo: totalNftCountLabel.bottomAnchor, constant: 2),
             totalPriceLabel.leadingAnchor.constraint(equalTo: totalNftCountLabel.leadingAnchor),
-            totalPriceLabel.bottomAnchor.constraint(equalTo: footerView.bottomAnchor, constant: -16),
+            totalPriceLabel.bottomAnchor.constraint(equalTo: bottomPaymentView.bottomAnchor, constant: -16),
             
-            payButton.topAnchor.constraint(equalTo: footerView.topAnchor, constant: 16),
-            payButton.leadingAnchor.constraint(equalTo: totalPriceLabel.trailingAnchor, constant: 20),
-            payButton.trailingAnchor.constraint(equalTo: footerView.trailingAnchor, constant: -16),
-            payButton.bottomAnchor.constraint(equalTo: footerView.bottomAnchor, constant: -16)
+            payButton.topAnchor.constraint(equalTo: bottomPaymentView.topAnchor, constant: 16),
+            payButton.trailingAnchor.constraint(equalTo: bottomPaymentView.trailingAnchor, constant: -16),
+            payButton.bottomAnchor.constraint(equalTo: bottomPaymentView.bottomAnchor, constant: -16),
+            payButton.leadingAnchor.constraint(equalTo: totalPriceLabel.trailingAnchor, constant: 24)
         ])
     }
     
@@ -226,15 +220,20 @@ final class CartViewController: UIViewController, UITableViewDelegate, UITableVi
                 return
             }
             
-            let alert = UIAlertController(title: "Сортировка", message: nil, preferredStyle: .actionSheet)
+            let alert = UIAlertController(
+                title: NSLocalizedString("cart_nav_sortAlert_title", comment: ""),
+                message: nil,
+                preferredStyle: .actionSheet
+            )
             
-            for sortType in CartSortType.allCases {
-                let action = UIAlertAction(title: sortType.title, style: .default) { _ in
+            CartSortType.allCases.forEach { sortType in
+                let style: UIAlertAction.Style = (sortType == .cancel) ? .cancel : .default
+                let action = UIAlertAction(title: sortType.title, style: style) { _ in
                     self.viewModel.onSortStateDidChanged?(sortType)
                 }
                 alert.addAction(action)
             }
-       
+            
             DispatchQueue.main.async {
                 self.present(alert, animated: true, completion: nil)
             }
@@ -243,7 +242,7 @@ final class CartViewController: UIViewController, UITableViewDelegate, UITableVi
     
     private func showDeleteConfirmation(for item: CartItem) {
         let deleteVC = CartDeleteItemViewController(imageURL: item.imageURL)
-
+        
         deleteVC.modalPresentationStyle = .overCurrentContext
         deleteVC.modalTransitionStyle = .crossDissolve
         
@@ -261,5 +260,11 @@ final class CartViewController: UIViewController, UITableViewDelegate, UITableVi
     
     @objc private func rightButtonTapped() {
         viewModel.didSortButtonTapped?()
+    }
+    
+    @objc private func didTapPayButton() {
+        let paymentViewController = PaymentMethodViewController()
+        paymentViewController.hidesBottomBarWhenPushed = true
+        navigationController?.pushViewController(paymentViewController, animated: true)
     }
 }

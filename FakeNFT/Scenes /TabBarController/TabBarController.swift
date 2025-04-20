@@ -19,14 +19,21 @@ final class TabBarController: UITabBarController {
         tag: 0
     )
     
-    private let cartTabBarItem: UITabBarItem = {
-        let image = UIImage(named: "tabIconCart")
-        let item = UITabBarItem(
+    private lazy var cartAssembly = CartAssembly(
+        servicesAssembly: servicesAssembly
+    )
+    
+    private lazy var cartController: UINavigationController = {
+        
+        let cartVC = cartAssembly.build()
+        
+        let navController = UINavigationController(rootViewController: cartVC)
+        navController.tabBarItem = UITabBarItem(
             title: NSLocalizedString("Tab.cart", comment: ""),
-            image: image,
-            tag: 2
+            image: UIImage(named: "tabIconCart"),
+            selectedImage: nil
         )
-        return item
+        return navController
     }()
     
     override func viewDidLoad() {
@@ -35,11 +42,6 @@ final class TabBarController: UITabBarController {
         let catalogController = TestCatalogViewController(
             servicesAssembly: servicesAssembly
         )
-        catalogController.tabBarItem = catalogTabBarItem
-        
-        let cartAssembly = CartAssembly(servicesAssembly: servicesAssembly)
-        let cartController = cartAssembly.build()
-        cartController.tabBarItem = cartTabBarItem
         
         viewControllers = [catalogController, cartController]
         
