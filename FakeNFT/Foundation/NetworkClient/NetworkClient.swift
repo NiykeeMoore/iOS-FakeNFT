@@ -121,7 +121,6 @@ struct DefaultNetworkClient: NetworkClient {
         urlRequest.httpMethod = request.httpMethod.rawValue
 
         urlRequest.addValue(RequestConstants.token, forHTTPHeaderField: "X-Practicum-Mobile-Token")
-        urlRequest.addValue("application/json", forHTTPHeaderField: "Accept")
 
         if let dtoDictionary = request.dto?.asDictionary() {
             var urlComponents = URLComponents()

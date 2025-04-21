@@ -20,5 +20,5 @@ protocol Dto {
 // default values
 extension NetworkRequest {
     var httpMethod: HttpMethod { .get }
-    var dto: Dto? { nil }
+    var dto: Encodable? { nil }
 }
