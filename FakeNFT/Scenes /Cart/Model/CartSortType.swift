@@ -16,13 +16,13 @@ enum CartSortType: CaseIterable {
     var title: String {
         switch self {
         case .priceDescending:
-            return "По цене"
+            return NSLocalizedString("cart_nav_sortAlert_priceDescending", comment: "")
         case .nameDescending:
-            return "По названию"
+            return NSLocalizedString("cart_nav_sortAlert_nameDescending", comment: "")
         case .raitingDescending:
-            return "По рейтингу"
+            return NSLocalizedString("cart_nav_sortAlert_raitingDescending", comment: "")
         case .cancel:
-            return "Закрыть"
+            return NSLocalizedString("cart_nav_sortAlert_cancel", comment: "")
         }
     }
 }

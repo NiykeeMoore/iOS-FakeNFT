@@ -135,6 +135,7 @@ final class CartViewModelImpl: CartViewModel {
             
         case .data(let items):
             onLoadingStateChange?(false)
+            //todo вот тут надо показать 0 и отправить плейсхолдер
             cartItemsInternal = items
             sortItems(by: sortState, items: items) { [weak self] sortedItems in
                 guard let self else {
