@@ -598,13 +598,6 @@
 			path = LikedNFTs;
 			sourceTree = "<group>";
 		};
-		BF46CFDD2DB7FD8600AA7930 /* ScreenCasts */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = ScreenCasts;
-			sourceTree = "<group>";
-		};
 		BFD642CB2D9D6D7800C8C2E3 /* NftCollection */ = {
 			isa = PBXGroup;
 			children = (
@@ -706,7 +699,6 @@
 		E1CD40DA2A96BE9B00BE7FE8 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
-				BF46CFDD2DB7FD8600AA7930 /* ScreenCasts */,
 				3F68069F29CBBAF200B4F915 /* Assets.xcassets */,
 				3F6806A129CBBAF200B4F915 /* LaunchScreen.storyboard */,
 				4B9A201E2D92A33700747D37 /* Localizable.xcstrings */,
