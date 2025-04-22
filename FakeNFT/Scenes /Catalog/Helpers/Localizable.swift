@@ -9,11 +9,6 @@ import Foundation
 
 enum Localizable {
     enum Sorting {
-        static let title = NSLocalizedString(
-            "Sorting.title",
-            value: "Sorting",
-            comment: "Title for sorting action sheet"
-        )
         static let byName = NSLocalizedString(
             "Sorting.byName",
             value: "By Name",
@@ -28,6 +23,11 @@ enum Localizable {
             "Sorting.cancel",
             value: "Cancel",
             comment: "Cancel sorting action"
+        )
+        static let alertTitle = NSLocalizedString(
+            "Sorting.alertTitle",
+            value: "Sorting",
+            comment: "Title for sorting action sheet"
         )
     }
 }

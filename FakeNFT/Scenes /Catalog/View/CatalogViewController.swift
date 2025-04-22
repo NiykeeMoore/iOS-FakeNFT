@@ -73,7 +73,7 @@ final class CatalogViewController: UIViewController, LoadingView {
     
     @objc private func sortButtonTapped() {
         let sortingAlert  = UIAlertController(
-            title: Localizable.Sorting.title,
+            title: Localizable.Sorting.alertTitle,
             message: nil,
             preferredStyle: .actionSheet
         )
