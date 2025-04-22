@@ -38,6 +38,7 @@ final class MyNFTsViewController: UIViewController {
         tableView.rowHeight = 140
         tableView.translatesAutoresizingMaskIntoConstraints = false
         tableView.allowsSelection = false
+        tableView.backgroundColor = UIColor(named: "appWhiteDynamic")
         return tableView
     }()
     
@@ -136,7 +137,7 @@ final class MyNFTsViewController: UIViewController {
             .withTintColor(UIColor(named: "appBlackDynamic") ?? .black, renderingMode: .alwaysOriginal)
         
         customNavBar.configureLeftButton(image: leftImage, target: self, action: #selector(backButtonTapped))
-        customNavBar.configureTitle(isEmptyNFT ? nil : NSLocalizedString("Profile.likedNFT", comment: ""))
+        customNavBar.configureTitle(isEmptyNFT ? nil : NSLocalizedString("Profile.myNFT", comment: ""))
         customNavBar.configureRightButton(image: rightImage, target: self, action: #selector(sortButtonTapped))
         
         // Layout constraints

@@ -106,6 +106,8 @@ final class NFTTableViewCell: UITableViewCell {
     }
     
     private func setupViews() {
+        contentView.backgroundColor = UIColor(resource: .appWhiteDynamic)
+
         contentView.addSubview(nftImageView)
         contentView.addSubview(likeButton)
         

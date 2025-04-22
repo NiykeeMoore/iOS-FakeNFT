@@ -9,9 +9,25 @@ import Foundation
 
 enum Localizable {
     enum Sorting {
-        static let title = NSLocalizedString("Sorting.title", value: "Sorting", comment: "Title for sorting action sheet")
-        static let byName = NSLocalizedString("Sorting.byName", value: "By Name", comment: "Sort by name option")
-        static let byQuantity = NSLocalizedString("Sorting.byQuantity", value: "By Quantity", comment: "Sort by quantity option")
-        static let cancel = NSLocalizedString("Sorting.cancel", value: "Cancel", comment: "Cancel sorting action")
+        static let title = NSLocalizedString(
+            "Sorting.title",
+            value: "Sorting",
+            comment: "Title for sorting action sheet"
+        )
+        static let byName = NSLocalizedString(
+            "Sorting.byName",
+            value: "By Name",
+            comment: "Sort by name option"
+        )
+        static let byQuantity = NSLocalizedString(
+            "Sorting.byQuantity",
+            value: "By Quantity",
+            comment: "Sort by quantity option"
+        )
+        static let cancel = NSLocalizedString(
+            "Sorting.cancel",
+            value: "Cancel",
+            comment: "Cancel sorting action"
+        )
     }
 }
