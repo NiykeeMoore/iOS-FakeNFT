@@ -73,7 +73,7 @@ final class CartServiceImpl: CartService {
                     id: nft.id,
                     name: nft.name,
                     imageURL: nft.images.first,
-                    price: nft.price,
+                    price: Float(nft.price),
                     rating: nft.rating
                 )
             }
