@@ -72,7 +72,7 @@ final class CartCell: UITableViewCell {
     
     // MARK: - UI Setup
     private func setupUI() {
-        contentView.backgroundColor = .clear
+        contentView.backgroundColor = UIColor(resource: .appWhiteDynamic)
         
         [
             itemImageView,
