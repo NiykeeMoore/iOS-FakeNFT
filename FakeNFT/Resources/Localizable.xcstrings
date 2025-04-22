@@ -874,23 +874,6 @@
         }
       }
     },
-    "Sorting" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sorting"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Сортировка"
-          }
-        }
-      }
-    },
     "Sorting.byName" : {
       "comment" : "Sort by name option",
       "localizations" : {
@@ -955,7 +938,7 @@
         "ru" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Sorting"
+            "value" : "Сортировка"
           }
         }
       }
