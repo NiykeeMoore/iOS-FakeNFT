@@ -38,6 +38,7 @@ final class MyNFTsViewController: UIViewController {
         tableView.rowHeight = 140
         tableView.translatesAutoresizingMaskIntoConstraints = false
         tableView.allowsSelection = false
+        tableView.backgroundColor = UIColor(named: "appWhiteDynamic")
         return tableView
     }()
     
