@@ -59,14 +59,14 @@ final class ProfileViewController: UIViewController {
         return label
     }()
     
-    private lazy var websiteLabel: UILabel = {
-        let label = UILabel()
-        label.translatesAutoresizingMaskIntoConstraints = false
-        label.font = .systemFont(ofSize: 15, weight: .regular)
-        label.text = viewModel.profileData?.website  ?? ""
-        label.textColor = UIColor(named: "appBlue")
-        label.numberOfLines = 1
-        return label
+    private lazy var websiteButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.titleLabel?.font = .systemFont(ofSize: 15, weight: .regular)
+        button.setTitle(viewModel.profileData?.website ?? "", for: .normal)
+        button.setTitleColor(UIColor(named: "appBlue"), for: .normal)
+        button.contentHorizontalAlignment = .left
+        return button
     }()
     
     private lazy var tableView: UITableView = {
@@ -150,11 +150,12 @@ final class ProfileViewController: UIViewController {
         contentView.addSubview(profileImageView)
         contentView.addSubview(nameLabel)
         contentView.addSubview(descriptionLabel)
-        contentView.addSubview(websiteLabel)
+        contentView.addSubview(websiteButton)
         contentView.addSubview(tableView)
         
         // Add button actions
         editButton.addTarget(self, action: #selector(editButtonTapped), for: .touchUpInside)
+        websiteButton.addTarget(self, action: #selector(openWebsite), for: .touchUpInside)
     }
     
     private func setupTableView() {
@@ -166,7 +167,7 @@ final class ProfileViewController: UIViewController {
         profileImageView.kf.setImage(with: URL(string: profileData.avatar ?? ""))
         nameLabel.text = profileData.name
         descriptionLabel.text = profileData.description
-        websiteLabel.text = profileData.website
+        websiteButton.setTitle(profileData.website, for: .normal)
         tableData = viewModel.getTableData()
         tableView.reloadData()
     }
@@ -216,12 +217,12 @@ final class ProfileViewController: UIViewController {
             descriptionLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
             
             // Website Label
-            websiteLabel.topAnchor.constraint(equalTo: descriptionLabel.bottomAnchor, constant: 12),
-            websiteLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
-            websiteLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
+            websiteButton.topAnchor.constraint(equalTo: descriptionLabel.bottomAnchor, constant: 12),
+            websiteButton.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+            websiteButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
             
             // Table View
-            tableView.topAnchor.constraint(equalTo: websiteLabel.bottomAnchor, constant: 40),
+            tableView.topAnchor.constraint(equalTo: websiteButton.bottomAnchor, constant: 40),
             tableView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
             tableView.heightAnchor.constraint(equalToConstant: CGFloat(3 * 54)),
@@ -309,7 +310,7 @@ extension ProfileViewController: UITableViewDataSource, UITableViewDelegate {
         tableView.reloadData()
     }
     
-    private func openWebsite() {
+    @objc private func openWebsite() {
         guard let url = viewModel.validateWebsiteURL() else {
             showErrorAlert(errorDescription: NSLocalizedString("Webview.invalidURL", comment: ""))
             return

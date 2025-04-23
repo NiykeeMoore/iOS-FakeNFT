@@ -102,6 +102,9 @@ final class LikedNFTsViewModel: LikedNFTsViewModelProtocol {
             
             switch result {
             case .success(_):
+                if index >= nfts.count {
+                    return
+                }
                 nfts.remove(at: index)
                 profileData.likes?.remove(at: index)
                 let indexPath = IndexPath(row: index, section: 0)

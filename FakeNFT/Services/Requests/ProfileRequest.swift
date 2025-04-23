@@ -33,7 +33,7 @@ struct ProfileDtoObject: Dto {
             result["website"] = website
         }
         if let likes {
-            result["likes"] = likes.isEmpty ? nil : likes.joined(separator: ",")
+            result["likes"] = likes.isEmpty ? "null" : likes.joined(separator: ",")
         }
         
         return result
