@@ -18,6 +18,7 @@ protocol CartViewModel {
     func numberOfItems() -> Int
     func item(at indexPath: IndexPath) -> CartItem?
     func viewDidLoad()
+    func viewWillAppear()
     func retryLoad()
     func deleteItem(withId id: String)
 }
@@ -71,6 +72,10 @@ final class CartViewModelImpl: CartViewModel {
     // MARK: - CartViewModel Protocol
     
     func viewDidLoad() {
+        state = .loading
+    }
+    
+    func viewWillAppear() {
         state = .loading
     }
     
