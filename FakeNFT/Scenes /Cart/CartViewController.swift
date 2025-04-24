@@ -214,16 +214,9 @@ final class CartViewController: UIViewController, UITableViewDelegate, UITableVi
             guard let self else {
                 return
             }
-            if viewModel.numberOfItems() == 0 {
-                navigationController?.navigationBar.isHidden = true
-                nftListTableView.isHidden = true
-                bottomPaymentView.isHidden = true
-                placeholderLabel.isHidden = false
-            } else {
-                self.totalNftCountLabel.text = "\(count) NFT"
-                self.totalPriceLabel.text = price
-                self.payButton.isEnabled = count > 0
-            }
+            
+            let isEmpty = count == 0
+            self.updateUI(isEmpty: isEmpty, count: count, price: price)
         }
         
         viewModel.onLoadingStateChange = { [weak self] isLoading in
@@ -284,6 +277,25 @@ final class CartViewController: UIViewController, UITableViewDelegate, UITableVi
         }
         
         present(deleteVC, animated: true)
+    }
+    
+    private func updateUI(isEmpty: Bool, count: Int, price: String) {
+        DispatchQueue.main.async { [weak self] in
+            guard let self else { return }
+            
+            self.navigationController?.isNavigationBarHidden = isEmpty
+            
+            self.nftListTableView.isHidden = isEmpty
+            self.bottomPaymentView.isHidden = isEmpty
+            self.placeholderLabel.isHidden = !isEmpty
+            
+            if !isEmpty {
+                self.totalNftCountLabel.text = "\(count) NFT"
+                self.totalPriceLabel.text = price
+            }
+            
+            self.payButton.isEnabled = !isEmpty
+        }
     }
     
     // MARK: - Actions

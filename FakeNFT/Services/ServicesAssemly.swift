@@ -30,4 +30,8 @@ final class ServicesAssembly {
     var orderService: OrderService {
         OrderService(networkClient: networkClient)
     }
+    
+    var cartService: CartService {
+        CartServiceImpl(networkClient: networkClient)
+    }
 }

@@ -17,7 +17,8 @@ final class PaymentAssembly {
     func build() -> UIViewController {
         let networkClient = servicesAssembler.networkClient
         let paymentService = PaymentService(networkClient: networkClient)
-        let viewModel = PaymentViewModel(paymentService: paymentService)
+        let cartService = servicesAssembler.cartService
+        let viewModel = PaymentViewModel(paymentService: paymentService, cartService: cartService)
         let viewController = PaymentMethodViewController(viewModel: viewModel)
         return viewController
     }

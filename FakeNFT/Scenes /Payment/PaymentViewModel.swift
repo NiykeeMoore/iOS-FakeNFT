@@ -46,10 +46,12 @@ final class PaymentViewModel: PaymentViewModelProtocol {
     var onPaymentFailed: ((ErrorModel) -> Void)?
     
     private let paymentService: PaymentServiceProtocol
+    private let cartService: CartService
     private var selectedPaymentMethodId: String?
     
-    init(paymentService: PaymentServiceProtocol) {
+    init(paymentService: PaymentServiceProtocol, cartService: CartService) {
         self.paymentService = paymentService
+        self.cartService = cartService
     }
     
     func loadPaymentMethods() {
@@ -109,6 +111,14 @@ final class PaymentViewModel: PaymentViewModelProtocol {
             switch result {
             case .success(let paymentResult):
                 if paymentResult.success {
+                    self.cartService.updateOrder(with: []) { result in
+                        switch result {
+                        case .success:
+                            print("Корзина очищена после оплаты")
+                        case .failure(let error):
+                            print("Не удалось очистить корзину после оплаты: \(error)")
+                        }
+                    }
                     self.onPaymentSuccess?()
                 } else {
                     let errorModel = ErrorModel(
@@ -119,6 +129,7 @@ final class PaymentViewModel: PaymentViewModelProtocol {
                     }
                     self.onPaymentFailed?(errorModel)
                 }
+                
             case .failure(let error):
                 let errorModel = self.makeErrorModel(error: error)
                 self.onPaymentFailed?(errorModel)

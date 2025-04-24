@@ -82,7 +82,14 @@ final class CartServiceImpl: CartService {
     }
     
     func updateOrder(with nftIds: [String], completion: @escaping CartUpdateCompletion) {
-        let request = UpdateOrderRequest(nftIds: nftIds)
+        let request: NetworkRequest
+        if nftIds.isEmpty {
+            request = ClearOrderRequest()
+            print("Отправка запроса на очистку корзины")
+        } else {
+            request = UpdateOrderRequest(nftIds: nftIds)
+            print("Отправка запроса на обновление корзины с \(nftIds.count) элементами")
+        }
 
         networkClient.send(request: request, type: OrderResult.self) { result in
             switch result {
