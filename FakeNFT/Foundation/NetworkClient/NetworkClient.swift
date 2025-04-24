@@ -60,7 +60,9 @@ struct DefaultNetworkClient: NetworkClient {
                 onResponse(result)
             }
         }
-        guard let urlRequest = create(request: request) else { return nil }
+        guard let urlRequest = create(request: request) else {
+            return nil
+        }
 
         let task = session.dataTask(with: urlRequest) { data, response, error in
             guard let response = response as? HTTPURLResponse else {
@@ -119,6 +121,7 @@ struct DefaultNetworkClient: NetworkClient {
         urlRequest.httpMethod = request.httpMethod.rawValue
 
         urlRequest.addValue(RequestConstants.token, forHTTPHeaderField: "X-Practicum-Mobile-Token")
+        urlRequest.addValue("application/json", forHTTPHeaderField: "Accept")
 
         if let dtoDictionary = request.dto?.asDictionary() {
             var urlComponents = URLComponents()
